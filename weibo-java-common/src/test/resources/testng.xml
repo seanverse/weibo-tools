@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Weixin-java-tool-suite" verbose="1">
+  <test name="Bean_Test">
+    <classes>
+      <class name="vip.seanxq.weibo.common.bean.WeiboAccessTokenTest"/>
+      <class name="vip.seanxq.weibo.common.error.WeiboErrorTest"/>
+      <class name="vip.seanxq.weibo.common.bean.WeiboMenuTest"/>
+      <class name="vip.seanxq.weibo.common.util.crypto.WeiboCryptUtilTest"/>
+      <class name="vip.seanxq.weibo.common.api.WeiboMessageInMemoryDuplicateCheckerTest"/>
+      <class name="vip.seanxq.weibo.common.session.SessionTest"/>
+    </classes>
+  </test>
+</suite>

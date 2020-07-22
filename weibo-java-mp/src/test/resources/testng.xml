@@ -1,0 +1,26 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Weixin-java-tool-suite" verbose="1">
+  <test name="API_Test">
+    <classes>
+      <class name="vip.seanxq.weibo.mp.api.WeiboMpBusyRetryTest"/>
+      <class name="vip.seanxq.weibo.mp.api.impl.WeibMpMassMessageServiceImplTest"/>
+      <class name="vip.seanxq.weibo.mp.api.impl.WeiboMpUserServiceImplTest"/>
+      <class name="vip.seanxq.weibo.mp.api.impl.WeibMpQrcodeServiceImplTest"/>
+      <class name="vip.seanxq.weibo.mp.api.WeibMpMessageRouterTest"/>
+      <class name="vip.seanxq.weibo.mp.api.WeiboMpJsAPITest"/>
+    </classes>
+  </test>
+
+  <test name="Bean_Test">
+    <classes>
+      <class name="vip.seanxq.weibo.mp.bean.message.WeiboMpXmlMessageTest"/>
+      <class name="vip.seanxq.weibo.mp.bean.message.WeiboMpXmlOutImageMessageTest"/>
+      <class name="vip.seanxq.weibo.mp.bean.message.WeiboMpXmlOutMusicMessageTest"/>
+      <class name="vip.seanxq.weibo.mp.bean.message.WeiboMpXmlOutNewsMessageTest"/>
+      <class name="vip.seanxq.weibo.mp.bean.message.WeiboMpXmlOutVideoMessageTest"/>
+      <class name="vip.seanxq.weibo.mp.bean.message.WeiboMpXmlOutVoiceMessageTest"/>
+      <class name="vip.seanxq.weibo.mp.bean.message.WeiboMpXmlOutTextMessageTest"/>
+    </classes>
+  </test>
+</suite>
