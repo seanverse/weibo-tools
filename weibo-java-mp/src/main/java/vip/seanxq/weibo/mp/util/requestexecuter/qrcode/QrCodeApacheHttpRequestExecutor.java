@@ -1,13 +1,17 @@
 package vip.seanxq.weibo.mp.util.requestexecuter.qrcode;
 
+import org.apache.http.Consts;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import vip.seanxq.weibo.common.WeiboType;
+import vip.seanxq.weibo.common.bean.HttpDataParam;
 import vip.seanxq.weibo.common.error.WeiboError;
 import vip.seanxq.weibo.common.error.WeiboErrorException;
 import vip.seanxq.weibo.common.util.fs.FileUtils;
 import vip.seanxq.weibo.common.util.http.RequestHttp;
 import vip.seanxq.weibo.common.util.http.apache.InputStreamResponseHandler;
 import vip.seanxq.weibo.common.util.http.apache.Utf8ResponseHandler;
-import vip.seanxq.weibo.mp.bean.result.WeiboMpQrCodeTicket;
+import vip.seanxq.weibo.mp.bean.result.WeiboFansQrCodeTicket;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -23,7 +27,7 @@ import java.net.URLEncoder;
 import java.util.UUID;
 
 /**
- * Created by ecoolper on 2017/5/5.
+ * QRCode 下载图片
  */
 public class QrCodeApacheHttpRequestExecutor extends QrCodeRequestExecutor<CloseableHttpClient, HttpHost> {
   public QrCodeApacheHttpRequestExecutor(RequestHttp requestHttp) {
@@ -31,23 +35,25 @@ public class QrCodeApacheHttpRequestExecutor extends QrCodeRequestExecutor<Close
   }
 
   @Override
-  public File execute(String uri, WeiboMpQrCodeTicket ticket, WeiboType weiboType) throws WeiboErrorException, IOException {
+  public File execute(String uri, WeiboFansQrCodeTicket ticket, WeiboType weiboType) throws WeiboErrorException, IOException {
+    HttpDataParam param = new HttpDataParam();
     if (ticket != null) {
-      if (uri.indexOf('?') == -1) {
-        uri += '?';
-      }
-      uri += uri.endsWith("?")
-        ? "ticket=" + URLEncoder.encode(ticket.getTicket(), "UTF-8")
-        : "&ticket=" + URLEncoder.encode(ticket.getTicket(), "UTF-8");
+      param.put("ticket", ticket.getTicket());
     }
 
-    HttpGet httpGet = new HttpGet(uri);
+    HttpPost httpPost = new HttpPost(uri);
     if (requestHttp.getRequestHttpProxy() != null) {
       RequestConfig config = RequestConfig.custom().setProxy(requestHttp.getRequestHttpProxy()).build();
-      httpGet.setConfig(config);
+      httpPost.setConfig(config);
+    }
+    //weibo接收的是 application/x-www-form-urlencoded：数据被编码为名称/值对。这是标准的编码格式
+    if (ticket.getTicket() != null) {
+      StringEntity entity = new StringEntity(param.toParamString(), Consts.UTF_8);
+      entity.setContentType("application/x-www-form-urlencoded; charset=utf-8");
+      httpPost.setEntity(entity);
     }
 
-    try (CloseableHttpResponse response = requestHttp.getRequestHttpClient().execute(httpGet);
+    try (CloseableHttpResponse response = requestHttp.getRequestHttpClient().execute(httpPost);
          InputStream inputStream = InputStreamResponseHandler.INSTANCE.handleResponse(response);) {
       Header[] contentTypeHeader = response.getHeaders("Content-Type");
       if (contentTypeHeader != null && contentTypeHeader.length > 0) {
@@ -60,7 +66,7 @@ public class QrCodeApacheHttpRequestExecutor extends QrCodeRequestExecutor<Close
       }
       return FileUtils.createTmpFile(inputStream, UUID.randomUUID().toString(), "jpg");
     } finally {
-      httpGet.releaseConnection();
+      httpPost.releaseConnection();
     }
   }
 }

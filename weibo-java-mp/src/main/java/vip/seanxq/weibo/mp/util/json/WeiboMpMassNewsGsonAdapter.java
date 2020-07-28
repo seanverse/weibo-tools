@@ -1,7 +1,7 @@
 package vip.seanxq.weibo.mp.util.json;
 
 import com.google.gson.*;
-import vip.seanxq.weibo.mp.bean.WeiboMpMassNews;
+import vip.seanxq.weibo.mp.bean.mass.WeiboMpMassNews;
 import vip.seanxq.weibo.mp.bean.material.WeiboMpNewsArticle;
 
 import java.lang.reflect.Type;

@@ -6,14 +6,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import vip.seanxq.weibo.common.WeiboType;
 import vip.seanxq.weibo.common.bean.WeiboAccessToken;
 import vip.seanxq.weibo.common.bean.WeiboJsapiSignature;
 import vip.seanxq.weibo.common.bean.WeiboNetCheckResult;
 import vip.seanxq.weibo.common.enums.TicketType;
+import vip.seanxq.weibo.common.enums.WbMessageFormat;
 import vip.seanxq.weibo.common.error.WeiboError;
 import vip.seanxq.weibo.common.error.WeiboErrorException;
 import vip.seanxq.weibo.common.session.StandardSessionManager;
@@ -25,11 +24,9 @@ import vip.seanxq.weibo.common.util.http.*;
 import vip.seanxq.weibo.common.util.json.WeiboGsonBuilder;
 
 import vip.seanxq.weibo.mp.api.*;
-import vip.seanxq.weibo.mp.bean.WeiboMpSemanticQuery;
 import vip.seanxq.weibo.mp.bean.result.WeiboMpCurrentAutoReplyInfo;
 import vip.seanxq.weibo.mp.bean.result.WeiboMpOAuth2AccessToken;
-import vip.seanxq.weibo.mp.bean.result.WeiboMpSemanticQueryResult;
-import vip.seanxq.weibo.mp.bean.result.WeiboMpUser;
+import vip.seanxq.weibo.mp.bean.result.WeiboFansUser;
 import vip.seanxq.weibo.mp.config.WeiboConfigStorage;
 import vip.seanxq.weibo.mp.enums.WeiboMpApiUrl;
 import vip.seanxq.weibo.mp.util.WeiboMpConfigStorageHolder;
@@ -50,20 +47,35 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
 
   protected WeiboSessionManager sessionManager = new StandardSessionManager();
   private WeiboMpMaterialService materialService = new WeiboMpMaterialServiceImpl(this);
-  private WeibMpMenuService menuService = new WeibMpMenuServiceImpl(this);
-  private WeiboMpUserService userService = new WeiboMpUserServiceImpl(this);
-  private WeiboMpUserTagService tagService = new WeiboMpUserTagServiceImpl(this);
-  private WeibMpQrcodeService qrCodeService = new WeiboMpQrcodeServiceImpl(this);
-  private WeiboDataCubeService dataCubeService = new WeiboDataCubeServiceImpl(this);
+  private WeibCustomMenuService menuService = new WeibCustomMenuServiceImpl(this);
+  private WeiboFansUserService userService = new WeiboFansUserServiceImpl(this);
+  private WeiboFansTagService userGroupService = new WeiboFansTagServiceImpl(this);
+  private WeiboFansQrcodeService qrCodeService = new WeiboFansQrcodeServiceImpl(this);
   private WeiboMpUserBlacklistService blackListService = new WeiboMpUserBlacklistServiceImpl(this);
   private final WeiboMpSubscribeMsgService subscribeMsgService = new WeiboMpSubscribeMsgServiceImpl(this);
-  private WeibMpMassMessageService massMessageService = new WeibMpMassMessageServiceImpl(this);
-  private WeiboImgProcService imgProcService = new WeiboImgProcServiceImpl(this);
+  private WeibFansMassMessageService massMessageService = new WeibFansMassMessageServiceImpl(this);
+
 
   private Map<String, WeiboConfigStorage> configStorageMap;
 
   private int retrySleepMillis = 1000;
   private int maxRetryTimes = 5;
+
+  /**
+   * https://open.weibo.com/wiki/Eps/push/set_format
+   * @param format xml/json
+   * @throws WeiboErrorException error
+   */
+  @Override
+  public boolean setDataFormat(WbMessageFormat format) throws WeiboErrorException {
+      //WbMessageFormat format = this.getWxMpConfigStorage().getMessageFormat();
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("access_token", this.getAccessToken());
+    jsonObject.addProperty("format", format.getData_format());
+    log.debug("设定message format" + format.getData_format());
+    String responseContent = this.post(WeiboMpApiUrl.Other.SET_DATA_FORMAT_URL, jsonObject.toString());
+    return responseContent != null && !responseContent.contains("error_code"); //不含error_code表示设定成功
+  }
 
   @Override
   public boolean checkSignature(String timestamp, String nonce, String signature) {
@@ -194,7 +206,7 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   }
 
   @Override
-  public WeiboMpUser oauth2getUserInfo(WeiboMpOAuth2AccessToken token, String lang) throws WeiboErrorException {
+  public WeiboFansUser oauth2getUserInfo(WeiboMpOAuth2AccessToken token, String lang) throws WeiboErrorException {
     if (lang == null) {
       lang = "zh_CN";
     }
@@ -204,7 +216,7 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
     try {
       RequestExecutor<String, String> executor = SimpleGetRequestExecutor.create(this);
       String responseText = executor.execute(url, null, WeiboType.MP);
-      return WeiboMpUser.fromJson(responseText);
+      return WeiboFansUser.fromJson(responseText);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -331,8 +343,14 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
     }
 
     String accessToken = getAccessToken(false);
-    String uriWithAccessToken = uri + (uri.contains("?") ? "&" : "?") + "access_token=" + accessToken;
 
+    //weixin是在每个uri的queryparam带上?access_token = accessToken
+    //weibo的Post则是放入access_token放入request body中
+    //例如：curl "https://m.api.weibo.com/2/messages/custom_rule/update.json" -d 'access_token=ACCESS_TOKEN&id=ID&name=NAME'
+    //get则是放在queryparam ，例如：curl "https://m.api.weibo.com/2/messages/custom_rule/getid.json?access_token=ACCESS_TOKEN&follower_id=FOLLOWER_ID"
+
+    String uriWithAccessToken = uri + (uri.contains("?") ? "&" : "?") + "access_token=" + accessToken;
+    //todo: mark_seanx:实际执行之处 URLEncoder.encode(str, "UTF-8");
     try {
       T result = executor.execute(uriWithAccessToken, data, WeiboType.MP);
       log.debug("\n【请求地址】: {}\n【请求参数】：{}\n【响应数据】：{}", uriWithAccessToken, dataForLog, result);
@@ -465,22 +483,22 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   }
 
   @Override
-  public WeibMpMenuService getMenuService() {
+  public WeibCustomMenuService getMenuService() {
     return this.menuService;
   }
 
   @Override
-  public WeiboMpUserService getUserService() {
+  public WeiboFansUserService getUserService() {
     return this.userService;
   }
 
   @Override
-  public WeiboMpUserTagService getUserTagService() {
-    return this.tagService;
+  public WeiboFansTagService getUserTagService() {
+    return this.userGroupService;
   }
 
   @Override
-  public WeibMpQrcodeService getQrcodeService() {
+  public WeiboFansQrcodeService getQrcodeService() {
     return this.qrCodeService;
   }
 
@@ -505,7 +523,7 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   }
 
   @Override
-  public WeibMpMassMessageService getMassMessageService() {
+  public WeibFansMassMessageService getMassMessageService() {
     return this.massMessageService;
   }
 
@@ -515,22 +533,22 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   }
 
   @Override
-  public void setMenuService(WeibMpMenuService menuService) {
+  public void setMenuService(WeibCustomMenuService menuService) {
     this.menuService = menuService;
   }
 
   @Override
-  public void setUserService(WeiboMpUserService userService) {
+  public void setUserService(WeiboFansUserService userService) {
     this.userService = userService;
   }
 
   @Override
-  public void setTagService(WeiboMpUserTagService tagService) {
-    this.tagService = tagService;
+  public void setUserGroupService(WeiboFansTagService userGroupService) {
+    this.userGroupService = userGroupService;
   }
 
   @Override
-  public void setQrCodeService(WeibMpQrcodeService qrCodeService) {
+  public void setQrCodeService(WeiboFansQrcodeService qrCodeService) {
     this.qrCodeService = qrCodeService;
   }
 
@@ -545,7 +563,7 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   }
 
   @Override
-  public void setMassMessageService(WeibMpMassMessageService massMessageService) {
+  public void setMassMessageService(WeibFansMassMessageService massMessageService) {
     this.massMessageService = massMessageService;
   }
 

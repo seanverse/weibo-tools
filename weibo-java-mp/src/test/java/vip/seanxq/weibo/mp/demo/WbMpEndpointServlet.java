@@ -1,6 +1,6 @@
 package vip.seanxq.weibo.mp.demo;
 
-import vip.seanxq.weibo.mp.api.WeibMpMessageRouter;
+import vip.seanxq.weibo.mp.api.WeiboFansMessageRouter;
 import vip.seanxq.weibo.mp.api.WeiboMpService;
 import vip.seanxq.weibo.mp.config.WeiboConfigStorage;
 import vip.seanxq.weibo.mp.bean.message.WeiboMpXmlMessage;
@@ -20,13 +20,13 @@ public class WbMpEndpointServlet extends HttpServlet {
 
   protected WeiboConfigStorage weiboConfigStorage;
   protected WeiboMpService wxMpService;
-  protected WeibMpMessageRouter weibMpMessageRouter;
+  protected WeiboFansMessageRouter weiboFansMessageRouter;
 
   public WbMpEndpointServlet(WeiboConfigStorage weiboConfigStorage, WeiboMpService wxMpService,
-                             WeibMpMessageRouter weibMpMessageRouter) {
+                             WeiboFansMessageRouter weiboFansMessageRouter) {
     this.weiboConfigStorage = weiboConfigStorage;
     this.wxMpService = wxMpService;
-    this.weibMpMessageRouter = weibMpMessageRouter;
+    this.weiboFansMessageRouter = weiboFansMessageRouter;
   }
 
   @Override
@@ -60,7 +60,7 @@ public class WbMpEndpointServlet extends HttpServlet {
     if ("raw".equals(encryptType)) {
       // 明文传输的消息
       WeiboMpXmlMessage inMessage = WeiboMpXmlMessage.fromXml(request.getInputStream());
-      WeiboMpXmlOutMessage outMessage = this.weibMpMessageRouter.route(inMessage);
+      WeiboMpXmlOutMessage outMessage = this.weiboFansMessageRouter.route(inMessage);
       if (outMessage != null) {
         response.getWriter().write(outMessage.toXml());
       }
@@ -71,7 +71,7 @@ public class WbMpEndpointServlet extends HttpServlet {
       // 是aes加密的消息
       String msgSignature = request.getParameter("msg_signature");
       WeiboMpXmlMessage inMessage = WeiboMpXmlMessage.fromEncryptedXml(request.getInputStream(), this.weiboConfigStorage, timestamp, nonce, msgSignature);
-      WeiboMpXmlOutMessage outMessage = this.weibMpMessageRouter.route(inMessage);
+      WeiboMpXmlOutMessage outMessage = this.weiboFansMessageRouter.route(inMessage);
       response.getWriter().write(outMessage.toEncryptedXml(this.weiboConfigStorage));
       return;
     }

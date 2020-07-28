@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import vip.seanxq.weibo.mp.bean.WeiboMpMassVideo;
+import vip.seanxq.weibo.mp.bean.mass.WeiboMpMassVideo;
 
 import java.lang.reflect.Type;
 

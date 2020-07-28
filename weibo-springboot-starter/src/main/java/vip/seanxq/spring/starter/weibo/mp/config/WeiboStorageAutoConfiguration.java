@@ -86,6 +86,7 @@ public class WeiboStorageAutoConfiguration {
     config.setSecret(properties.getSecret());
     config.setToken(properties.getToken());
     config.setAesKey(properties.getAesKey());
+    config.setMessageFormat(properties.getMessageFormat());
 
     config.setHttpProxyHost(configStorageProperties.getHttpProxyHost());
     config.setHttpProxyUsername(configStorageProperties.getHttpProxyUsername());

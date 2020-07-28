@@ -7,9 +7,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import lombok.Data;
 import vip.seanxq.weibo.common.bean.WeiboAccessToken;
+import vip.seanxq.weibo.common.enums.WbMessageFormat;
 import vip.seanxq.weibo.common.util.http.apache.ApacheHttpClientBuilder;
 import vip.seanxq.weibo.mp.config.WeiboConfigStorage;
-import vip.seanxq.weibo.mp.bean.WeiboMpHostConfig;
 import vip.seanxq.weibo.common.enums.TicketType;
 import vip.seanxq.weibo.mp.util.json.WbMpGsonBuilder;
 
@@ -25,7 +25,7 @@ public class WeiboDefaultConfigImpl implements WeiboConfigStorage, Serializable 
   protected volatile String appId;
   protected volatile String secret;
   protected volatile String token;
-  protected volatile String templateId;
+  protected volatile WbMessageFormat messageFormat = WbMessageFormat.XML;
   protected volatile String accessToken;
   protected volatile String aesKey;
   protected volatile long expiresTime;
@@ -49,11 +49,20 @@ public class WeiboDefaultConfigImpl implements WeiboConfigStorage, Serializable 
   protected Lock accessTokenLock = new ReentrantLock();
   protected Lock jsapiTicketLock = new ReentrantLock();
   protected Lock sdkTicketLock = new ReentrantLock();
-  protected Lock cardApiTicketLock = new ReentrantLock();
 
   protected volatile File tmpDirFile;
 
   protected volatile ApacheHttpClientBuilder apacheHttpClientBuilder;
+
+  /**
+   * 取得config里配置消息格式是xml/json
+   *
+   * @return
+   */
+  @Override
+  public WbMessageFormat getMessageFormat() {
+    return this.messageFormat;
+  }
 
   @Override
   public boolean isAccessTokenExpired() {

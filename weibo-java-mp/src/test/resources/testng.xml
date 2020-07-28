@@ -4,10 +4,10 @@
   <test name="API_Test">
     <classes>
       <class name="vip.seanxq.weibo.mp.api.WeiboMpBusyRetryTest"/>
-      <class name="vip.seanxq.weibo.mp.api.impl.WeibMpMassMessageServiceImplTest"/>
-      <class name="vip.seanxq.weibo.mp.api.impl.WeiboMpUserServiceImplTest"/>
-      <class name="vip.seanxq.weibo.mp.api.impl.WeibMpQrcodeServiceImplTest"/>
-      <class name="vip.seanxq.weibo.mp.api.WeibMpMessageRouterTest"/>
+      <class name="vip.seanxq.weibo.mp.api.impl.WeibFansMassMessageServiceImplTest"/>
+      <class name="vip.seanxq.weibo.mp.api.impl.WeiboFansUserServiceImplTest"/>
+      <class name="vip.seanxq.weibo.mp.api.impl.WeiboFansQrcodeServiceImplTest"/>
+      <class name="vip.seanxq.weibo.mp.api.WeiboFansMessageRouterTest"/>
       <class name="vip.seanxq.weibo.mp.api.WeiboMpJsAPITest"/>
     </classes>
   </test>

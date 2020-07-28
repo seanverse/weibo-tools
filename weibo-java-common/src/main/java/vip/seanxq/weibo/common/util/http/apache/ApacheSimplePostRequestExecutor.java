@@ -33,10 +33,10 @@ public class ApacheSimplePostRequestExecutor extends SimplePostRequestExecutor<C
       RequestConfig config = RequestConfig.custom().setProxy(requestHttp.getRequestHttpProxy()).build();
       httpPost.setConfig(config);
     }
-
+    //todo: seanx: weibo接收的是 application/x-www-form-urlencoded：数据被编码为名称/值对。这是标准的编码格式
     if (postEntity != null) {
       StringEntity entity = new StringEntity(postEntity, Consts.UTF_8);
-      entity.setContentType("application/json; charset=utf-8");
+      entity.setContentType("application/x-www-form-urlencoded; charset=utf-8");
       httpPost.setEntity(entity);
     }
 

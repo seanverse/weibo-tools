@@ -2,7 +2,7 @@ package vip.seanxq.weibo.mp.util.json;
 
 import com.google.gson.*;
 import vip.seanxq.weibo.common.api.WeiboConsts;
-import vip.seanxq.weibo.mp.bean.WeiboMassOpenIdsMessage;
+import vip.seanxq.weibo.mp.bean.mass.WeiboMassOpenIdsMessage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Type;

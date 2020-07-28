@@ -1,7 +1,6 @@
 package vip.seanxq.weibo.mp.api.impl;
 
 import vip.seanxq.weibo.common.error.WeiboErrorException;
-import vip.seanxq.weibo.common.util.http.HttpType;
 import vip.seanxq.weibo.common.util.http.apache.ApacheHttpClientBuilder;
 import vip.seanxq.weibo.common.util.http.apache.DefaultApacheHttpClientBuilder;
 import vip.seanxq.weibo.mp.config.WeiboConfigStorage;
@@ -33,11 +32,6 @@ public class WeiboMpServiceHttpClientImpl extends BaseWeiboMpServiceImpl<Closeab
   @Override
   public HttpHost getRequestHttpProxy() {
     return httpProxy;
-  }
-
-  @Override
-  public HttpType getRequestType() {
-    return HttpType.APACHE_HTTP;
   }
 
   @Override

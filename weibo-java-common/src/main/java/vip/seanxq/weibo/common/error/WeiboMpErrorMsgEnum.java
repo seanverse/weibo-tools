@@ -4,14 +4,12 @@ import lombok.Getter;
 
 /**
  * <pre>
- * 微博公众平台全局返回码.
- * 参考文档：<a href="http://mp.weixin.qq.com/wiki/10/6380dc743053a91c544ffd2b7c959166.html">公众平台全局返回码</a>
- * Created by Binary Wang on 2018/5/13.
+ * 微博全局返回码.
+ * 参考文档：<a href="https://open.weibo.com/wiki/Error_code">错误信息返回码</a> *
  * </pre>
- *
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
 @Getter
+@Deprecated
 public enum WeiboMpErrorMsgEnum {
   /**
    * 系统繁忙，此时请开发者稍候再试.

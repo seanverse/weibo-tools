@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import vip.seanxq.weibo.common.api.WeiboConsts;
-import vip.seanxq.weibo.mp.bean.WeiboMpMassTagMessage;
+import vip.seanxq.weibo.mp.bean.mass.WeiboMpMassTagMessage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Type;

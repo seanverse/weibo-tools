@@ -21,11 +21,4 @@ public interface RequestHttp<H, P> {
    */
   P getRequestHttpProxy();
 
-  /**
-   * 返回HttpType.
-   *
-   * @return HttpType
-   */
-  HttpType getRequestType();
-
 }

@@ -2,7 +2,6 @@ package vip.seanxq.weibo.common.bean;
 
 import vip.seanxq.weibo.common.bean.menu.WeiboMenu;
 import vip.seanxq.weibo.common.bean.menu.WeiboMenuButton;
-import vip.seanxq.weibo.common.bean.menu.WeiboMenuRule;
 import org.testng.*;
 import org.testng.annotations.*;
 

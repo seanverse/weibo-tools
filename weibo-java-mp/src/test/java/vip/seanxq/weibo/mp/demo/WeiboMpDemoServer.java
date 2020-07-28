@@ -1,10 +1,9 @@
 package vip.seanxq.weibo.mp.demo;
 
-import vip.seanxq.weibo.common.api.WeiboConsts;
-import vip.seanxq.weibo.mp.api.WeibMpMessageRouter;
+import vip.seanxq.weibo.mp.api.WeiboFansMessageRouter;
 import vip.seanxq.weibo.mp.api.WeiboMpService;
 import vip.seanxq.weibo.mp.config.WeiboConfigStorage;
-import vip.seanxq.weibo.mp.api.WeibMpMessageHandler;
+import vip.seanxq.weibo.mp.api.WeiboFansMessageHandler;
 import vip.seanxq.weibo.mp.api.impl.WeiboMpServiceHttpClientImpl;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
@@ -17,7 +16,7 @@ public class WeiboMpDemoServer {
 
   private static WeiboConfigStorage weiboConfigStorage;
   private static WeiboMpService wbMpService;
-  private static WeibMpMessageRouter weibMpMessageRouter;
+  private static WeiboFansMessageRouter weiboFansMessageRouter;
 
   public static void main(String[] args) throws Exception {
     initWeibo();
@@ -28,7 +27,7 @@ public class WeiboMpDemoServer {
     server.setHandler(servletHandler);
 
     ServletHolder endpointServletHolder = new ServletHolder(new WbMpEndpointServlet(weiboConfigStorage, wbMpService,
-            weibMpMessageRouter));
+      weiboFansMessageRouter));
     servletHandler.addServletWithMapping(endpointServletHolder, "/*");
 
     ServletHolder oauthServletHolder = new ServletHolder(new WbMpOAuth2Servlet(wbMpService));
@@ -46,13 +45,13 @@ public class WeiboMpDemoServer {
       wbMpService = new WeiboMpServiceHttpClientImpl();
       wbMpService.setWxMpConfigStorage(config);
 
-      WeibMpMessageHandler logHandler = new DemoLogHandler();
-      WeibMpMessageHandler textHandler = new DemoTextHandler();
-      WeibMpMessageHandler imageHandler = new DemoImageHandler();
-      WeibMpMessageHandler oauth2handler = new DemoOAuth2Handler();
+      WeiboFansMessageHandler logHandler = new DemoLogHandler();
+      WeiboFansMessageHandler textHandler = new DemoTextHandler();
+      WeiboFansMessageHandler imageHandler = new DemoImageHandler();
+      WeiboFansMessageHandler oauth2handler = new DemoOAuth2Handler();
 
-      weibMpMessageRouter = new WeibMpMessageRouter(wbMpService);
-      weibMpMessageRouter.rule().handler(logHandler).next().rule()
+      weiboFansMessageRouter = new WeiboFansMessageRouter(wbMpService);
+      weiboFansMessageRouter.rule().handler(logHandler).next().rule()
         .handler(textHandler).end().rule().async(false).content("图片")
         .handler(imageHandler).end().rule().async(false).content("oauth")
         .handler(oauth2handler).end();

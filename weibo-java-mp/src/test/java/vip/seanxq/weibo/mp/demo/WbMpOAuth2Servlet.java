@@ -3,7 +3,7 @@ package vip.seanxq.weibo.mp.demo;
 import vip.seanxq.weibo.common.error.WeiboErrorException;
 import vip.seanxq.weibo.mp.api.WeiboMpService;
 import vip.seanxq.weibo.mp.bean.result.WeiboMpOAuth2AccessToken;
-import vip.seanxq.weibo.mp.bean.result.WeiboMpUser;
+import vip.seanxq.weibo.mp.bean.result.WeiboFansUser;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -35,9 +35,9 @@ public class WbMpOAuth2Servlet extends HttpServlet {
       response.getWriter().println("<h1>access token</h1>");
       response.getWriter().println(weiboMpOAuth2AccessToken.toString());
 
-      WeiboMpUser weiboMpUser = this.wbMpService.oauth2getUserInfo(weiboMpOAuth2AccessToken, null);
+      WeiboFansUser weiboFansUser = this.wbMpService.oauth2getUserInfo(weiboMpOAuth2AccessToken, null);
       response.getWriter().println("<h1>user info</h1>");
-      response.getWriter().println(weiboMpUser.toString());
+      response.getWriter().println(weiboFansUser.toString());
 
       weiboMpOAuth2AccessToken = this.wbMpService.oauth2refreshAccessToken(weiboMpOAuth2AccessToken.getRefreshToken());
       response.getWriter().println("<h1>after refresh</h1>");

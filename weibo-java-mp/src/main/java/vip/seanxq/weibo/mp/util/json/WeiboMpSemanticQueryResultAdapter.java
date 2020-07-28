@@ -2,7 +2,6 @@ package vip.seanxq.weibo.mp.util.json;
 
 import com.google.gson.*;
 import vip.seanxq.weibo.common.util.json.GsonHelper;
-import vip.seanxq.weibo.mp.bean.result.WeiboMpSemanticQueryResult;
 
 import java.lang.reflect.Type;
 

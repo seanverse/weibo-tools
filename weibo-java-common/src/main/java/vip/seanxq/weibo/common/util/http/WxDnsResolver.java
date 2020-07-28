@@ -16,6 +16,7 @@ import java.util.Map;
  * <p>
  * Created by Andy Huo on 17/03/28.
  */
+@Deprecated
 public class WxDnsResolver implements DnsResolver {
 
   private final static String WECHAT_API_URL = "api.weixin.qq.com";

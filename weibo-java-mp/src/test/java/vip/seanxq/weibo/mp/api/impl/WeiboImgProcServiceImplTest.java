@@ -2,7 +2,6 @@ package vip.seanxq.weibo.mp.api.impl;
 
 import vip.seanxq.weibo.common.error.WeiboErrorException;
 import vip.seanxq.weibo.common.util.fs.FileUtils;
-import vip.seanxq.weibo.mp.api.WeiboImgProcService;
 import vip.seanxq.weibo.mp.api.WeiboMpService;
 import vip.seanxq.weibo.mp.api.test.ApiTestModule;
 import vip.seanxq.weibo.mp.api.test.TestConstants;

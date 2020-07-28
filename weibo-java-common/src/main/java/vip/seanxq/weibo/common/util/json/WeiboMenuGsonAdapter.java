@@ -11,7 +11,6 @@ package vip.seanxq.weibo.common.util.json;
 import com.google.gson.*;
 import vip.seanxq.weibo.common.bean.menu.WeiboMenu;
 import vip.seanxq.weibo.common.bean.menu.WeiboMenuButton;
-import vip.seanxq.weibo.common.bean.menu.WeiboMenuRule;
 
 import java.lang.reflect.Type;
 
@@ -32,10 +31,6 @@ public class WeiboMenuGsonAdapter implements JsonSerializer<WeiboMenu>, JsonDese
     }
     json.add("button", buttonArray);
 
-    if (menu.getMatchRule() != null) {
-      json.add("matchrule", convertToJson(menu.getMatchRule()));
-    }
-
     return json;
   }
 
@@ -44,10 +39,9 @@ public class WeiboMenuGsonAdapter implements JsonSerializer<WeiboMenu>, JsonDese
     buttonJson.addProperty("type", button.getType());
     buttonJson.addProperty("name", button.getName());
     buttonJson.addProperty("key", button.getKey());
-    buttonJson.addProperty("url", button.getUrl());
-    buttonJson.addProperty("media_id", button.getMediaId());
-    buttonJson.addProperty("appid", button.getAppId());
-    buttonJson.addProperty("pagepath", button.getPagePath());
+    if (button.getUrl() != null)
+      buttonJson.addProperty("url", button.getUrl());
+
     if (button.getSubButtons() != null && button.getSubButtons().size() > 0) {
       JsonArray buttonArray = new JsonArray();
       for (WeiboMenuButton sub_button : button.getSubButtons()) {
@@ -56,33 +50,6 @@ public class WeiboMenuGsonAdapter implements JsonSerializer<WeiboMenu>, JsonDese
       buttonJson.add("sub_button", buttonArray);
     }
     return buttonJson;
-  }
-
-  protected JsonObject convertToJson(WeiboMenuRule menuRule) {
-    JsonObject matchRule = new JsonObject();
-    matchRule.addProperty("tag_id", menuRule.getTagId());
-    matchRule.addProperty("sex", menuRule.getSex());
-    matchRule.addProperty("country", menuRule.getCountry());
-    matchRule.addProperty("province", menuRule.getProvince());
-    matchRule.addProperty("city", menuRule.getCity());
-    matchRule.addProperty("client_platform_type", menuRule.getClientPlatformType());
-    matchRule.addProperty("language", menuRule.getLanguage());
-    return matchRule;
-  }
-
-  @Deprecated
-  private WeiboMenuRule convertToRule(JsonObject json) {
-    WeiboMenuRule menuRule = new WeiboMenuRule();
-    //变态的微博接口，这里居然反人类的使用和序列化时不一样的名字
-    //menuRule.setTagId(GsonHelper.getString(json,"tag_id"));
-    menuRule.setTagId(GsonHelper.getString(json, "group_id"));
-    menuRule.setSex(GsonHelper.getString(json, "sex"));
-    menuRule.setCountry(GsonHelper.getString(json, "country"));
-    menuRule.setProvince(GsonHelper.getString(json, "province"));
-    menuRule.setCity(GsonHelper.getString(json, "city"));
-    menuRule.setClientPlatformType(GsonHelper.getString(json, "client_platform_type"));
-    menuRule.setLanguage(GsonHelper.getString(json, "language"));
-    return menuRule;
   }
 
   @Override
@@ -119,11 +86,10 @@ public class WeiboMenuGsonAdapter implements JsonSerializer<WeiboMenu>, JsonDese
     WeiboMenuButton button = new WeiboMenuButton();
     button.setName(GsonHelper.getString(json, "name"));
     button.setKey(GsonHelper.getString(json, "key"));
-    button.setUrl(GsonHelper.getString(json, "url"));
+    if (json.has("url"))
+      button.setUrl(GsonHelper.getString(json, "url"));
+
     button.setType(GsonHelper.getString(json, "type"));
-    button.setMediaId(GsonHelper.getString(json, "media_id"));
-    button.setAppId(GsonHelper.getString(json, "appid"));
-    button.setPagePath(GsonHelper.getString(json, "pagepath"));
     return button;
   }
 

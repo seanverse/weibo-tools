@@ -1,8 +1,8 @@
 package vip.seanxq.weibo.mp.config;
 
 import vip.seanxq.weibo.common.bean.WeiboAccessToken;
+import vip.seanxq.weibo.common.enums.WbMessageFormat;
 import vip.seanxq.weibo.common.util.http.apache.ApacheHttpClientBuilder;
-import vip.seanxq.weibo.mp.bean.WeiboMpHostConfig;
 import vip.seanxq.weibo.common.enums.TicketType;
 
 import java.io.File;
@@ -14,6 +14,13 @@ import java.util.concurrent.locks.Lock;
  * @author chanjarster
  */
 public interface WeiboConfigStorage {
+
+  /**
+   * 取得config里配置消息格式是xml/json
+   * @return
+   */
+  WbMessageFormat getMessageFormat();
+
   String getAccessToken();
 
   Lock getAccessTokenLock();
@@ -69,7 +76,7 @@ public interface WeiboConfigStorage {
 
   String getAesKey();
 
-  String getTemplateId();
+  //String getTemplateId();
 
   long getExpiresTime();
 
@@ -97,8 +104,4 @@ public interface WeiboConfigStorage {
    */
   boolean autoRefreshToken();
 
-  /**
-   * 得到微博接口地址域名部分的自定义设置信息.
-   */
-  WeiboMpHostConfig getHostConfig();
 }

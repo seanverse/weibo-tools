@@ -8,6 +8,7 @@ import lombok.Getter;
  * @author <a href="https://github.com/biggates">biggates</a>
  */
 @Getter
+@Deprecated
 public enum WeiboLightAppErrorMsgEnum {
   /**
    * <pre>

@@ -53,7 +53,6 @@ public class WeiboRedisConfigImpl extends WeiboDefaultConfigImpl {
     accessTokenLock = this.redisOps.getLock(lockKey.concat("accessTokenLock"));
     jsapiTicketLock = this.redisOps.getLock(lockKey.concat("jsapiTicketLock"));
     sdkTicketLock = this.redisOps.getLock(lockKey.concat("sdkTicketLock"));
-    cardApiTicketLock = this.redisOps.getLock(lockKey.concat("cardApiTicketLock"));
   }
 
   private String getTicketRedisKey(TicketType type) {

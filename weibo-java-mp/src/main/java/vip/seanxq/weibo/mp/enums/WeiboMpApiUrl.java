@@ -3,17 +3,13 @@ package vip.seanxq.weibo.mp.enums;
 import lombok.AllArgsConstructor;
 import vip.seanxq.weibo.mp.config.WeiboConfigStorage;
 
-import static vip.seanxq.weibo.mp.bean.WeiboMpHostConfig.*;
-
 /**
- * <pre>
- *  公众号接口api地址
- *  Created by BinaryWang on 2019-06-03.
- * </pre>
- *
- * @author <a href="https://github.com/binarywang">Binary Wang</a>
+ * weibo api url
  */
 public interface WeiboMpApiUrl {
+  public static final String API_DEFAULT_HOST_URL = "https://api.weibo.com/2";
+  public static final String FANS_DEFAULT_HOST_URL = "https://m.api.weibo.com/2";
+  public static final String OPEN_DEFAULT_HOST_URL = "https://open.weibo.com";
 
   /**
    * 得到api完整地址.
@@ -24,56 +20,9 @@ public interface WeiboMpApiUrl {
   String getUrl(WeiboConfigStorage config);
 
   @AllArgsConstructor
-  enum Device implements WeiboMpApiUrl {
-    /**
-     * get_bind_device.
-     */
-    DEVICE_GET_BIND_DEVICE(API_DEFAULT_HOST_URL, "/device/get_bind_device"),
-    /**
-     * get_openid.
-     */
-    DEVICE_GET_OPENID(API_DEFAULT_HOST_URL, "/device/get_openid"),
-    /**
-     * compel_unbind.
-     */
-    DEVICE_COMPEL_UNBIND(API_DEFAULT_HOST_URL, "/device/compel_unbind?"),
-    /**
-     * unbind.
-     */
-    DEVICE_UNBIND(API_DEFAULT_HOST_URL, "/device/unbind?"),
-    /**
-     * compel_bind.
-     */
-    DEVICE_COMPEL_BIND(API_DEFAULT_HOST_URL, "/device/compel_bind"),
-    /**
-     * bind.
-     */
-    DEVICE_BIND(API_DEFAULT_HOST_URL, "/device/bind"),
-    /**
-     * authorize_device.
-     */
-    DEVICE_AUTHORIZE_DEVICE(API_DEFAULT_HOST_URL, "/device/authorize_device"),
-    /**
-     * getqrcode.
-     */
-    DEVICE_GETQRCODE(API_DEFAULT_HOST_URL, "/device/getqrcode"),
-    /**
-     * transmsg.
-     */
-    DEVICE_TRANSMSG(API_DEFAULT_HOST_URL, "/device/transmsg");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-
-  }
-
-  @AllArgsConstructor
   enum Other implements WeiboMpApiUrl {
+    SET_DATA_FORMAT_URL(API_DEFAULT_HOST_URL, "/eps/push/set_format.json"),
+
     /**
      * 获取access_token.
      */
@@ -134,77 +83,34 @@ public interface WeiboMpApiUrl {
     private String prefix;
     private String path;
 
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum Marketing implements WeiboMpApiUrl {
-    /**
-     * sets add.
-     */
-    USER_ACTION_SETS_ADD(API_DEFAULT_HOST_URL, "/marketing/user_action_sets/add?version=v1.0"),
-    /**
-     * get.
-     */
-    USER_ACTION_SETS_GET(API_DEFAULT_HOST_URL, "/marketing/user_action_sets/get"),
-    /**
-     * add.
-     */
-    USER_ACTIONS_ADD(API_DEFAULT_HOST_URL, "/marketing/user_actions/add?version=v1.0"),
-    /**
-     * get.
-     */
-    WECHAT_AD_LEADS_GET(API_DEFAULT_HOST_URL, "/marketing/wechat_ad_leads/get");
-
-    private String prefix;
-    private String path;
 
     @Override
     public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
+      return prefix + path;
     }
   }
 
   @AllArgsConstructor
   enum Menu implements WeiboMpApiUrl {
     /**
-     * get_current_selfmenu_info.
-     */
-    GET_CURRENT_SELFMENU_INFO(API_DEFAULT_HOST_URL, "/cgi-bin/get_current_selfmenu_info"),
-    /**
-     * trymatch.
-     */
-    MENU_TRYMATCH(API_DEFAULT_HOST_URL, "/cgi-bin/menu/trymatch"),
-    /**
      * get.
      */
-    MENU_GET(API_DEFAULT_HOST_URL, "/cgi-bin/menu/get"),
-    /**
-     * delconditional.
-     */
-    MENU_DELCONDITIONAL(API_DEFAULT_HOST_URL, "/cgi-bin/menu/delconditional"),
+    MENU_GET(FANS_DEFAULT_HOST_URL, "/messages/menu/show.json"),
     /**
      * delete.
      */
-    MENU_DELETE(API_DEFAULT_HOST_URL, "/cgi-bin/menu/delete"),
+    MENU_DELETE(FANS_DEFAULT_HOST_URL, "/messages/menu/delete.json"),
     /**
      * create.
      */
-    MENU_CREATE(API_DEFAULT_HOST_URL, "/cgi-bin/menu/create"),
-    /**
-     * addconditional.
-     */
-    MENU_ADDCONDITIONAL(API_DEFAULT_HOST_URL, "/cgi-bin/menu/addconditional");
+    MENU_CREATE(FANS_DEFAULT_HOST_URL, "/messages/menu/create.json");
 
     private String prefix;
     private String path;
 
     @Override
     public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
+      return prefix + path;
     }
   }
 
@@ -214,50 +120,18 @@ public interface WeiboMpApiUrl {
     /**
      * create.
      */
-    QRCODE_CREATE(API_DEFAULT_HOST_URL, "/cgi-bin/qrcode/create"),
+    QRCODE_CREATE(API_DEFAULT_HOST_URL, "/eps/qrcode/create.json"),
     /**
      * showqrcode.
      */
-    SHOW_QRCODE(MP_DEFAULT_HOST_URL, "/cgi-bin/showqrcode"),
-    /**
-     * showqrcode.
-     */
-    SHOW_QRCODE_WITH_TICKET(MP_DEFAULT_HOST_URL, "/cgi-bin/showqrcode?ticket=%s");
+    SHOW_QRCODE(FANS_DEFAULT_HOST_URL, "/eps/qrcode/show");
 
     private String prefix;
     private String path;
 
     @Override
     public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum ShakeAround implements WeiboMpApiUrl {
-    /**
-     * getshakeinfo.
-     */
-    SHAKEAROUND_USER_GETSHAKEINFO(API_DEFAULT_HOST_URL, "/shakearound/user/getshakeinfo"),
-    /**
-     * add.
-     */
-    SHAKEAROUND_PAGE_ADD(API_DEFAULT_HOST_URL, "/shakearound/page/add"),
-    /**
-     * bindpage.
-     */
-    SHAKEAROUND_DEVICE_BINDPAGE(API_DEFAULT_HOST_URL, "/shakearound/device/bindpage"),
-    /**
-     * search.
-     */
-    SHAKEAROUND_RELATION_SEARCH(API_DEFAULT_HOST_URL, "/shakearound/relation/search");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
+      return  prefix + path;
     }
   }
 
@@ -266,7 +140,7 @@ public interface WeiboMpApiUrl {
     /**
      * subscribemsg.
      */
-    SUBSCRIBE_MESSAGE_AUTHORIZE_URL(MP_DEFAULT_HOST_URL, "/mp/subscribemsg?action=get_confirm&appid=%s&scene=%d&template_id=%s&redirect_url=%s&reserved=%s#wechat_redirect"),
+    SUBSCRIBE_MESSAGE_AUTHORIZE_URL(FANS_DEFAULT_HOST_URL, "/mp/subscribemsg?action=get_confirm&appid=%s&scene=%d&template_id=%s&redirect_url=%s&reserved=%s#wechat_redirect"),
     /**
      * subscribe.
      */
@@ -277,43 +151,7 @@ public interface WeiboMpApiUrl {
 
     @Override
     public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum TemplateMsg implements WeiboMpApiUrl {
-    /**
-     * send.
-     */
-    MESSAGE_TEMPLATE_SEND(API_DEFAULT_HOST_URL, "/cgi-bin/message/template/send"),
-    /**
-     * api_set_industry.
-     */
-    TEMPLATE_API_SET_INDUSTRY(API_DEFAULT_HOST_URL, "/cgi-bin/template/api_set_industry"),
-    /**
-     * get_industry.
-     */
-    TEMPLATE_GET_INDUSTRY(API_DEFAULT_HOST_URL, "/cgi-bin/template/get_industry"),
-    /**
-     * api_add_template.
-     */
-    TEMPLATE_API_ADD_TEMPLATE(API_DEFAULT_HOST_URL, "/cgi-bin/template/api_add_template"),
-    /**
-     * get_all_private_template.
-     */
-    TEMPLATE_GET_ALL_PRIVATE_TEMPLATE(API_DEFAULT_HOST_URL, "/cgi-bin/template/get_all_private_template"),
-    /**
-     * del_private_template.
-     */
-    TEMPLATE_DEL_PRIVATE_TEMPLATE(API_DEFAULT_HOST_URL, "/cgi-bin/template/del_private_template");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
+      return prefix + path;
     }
   }
 
@@ -337,430 +175,58 @@ public interface WeiboMpApiUrl {
 
     @Override
     public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
+      return prefix + path;
     }
   }
 
   @AllArgsConstructor
-  enum UserTag implements WeiboMpApiUrl {
+  enum FansUser implements WeiboMpApiUrl {
     /**
      * create.
      */
-    TAGS_CREATE(API_DEFAULT_HOST_URL, "/cgi-bin/tags/create"),
+    TAGS_CREATE(FANS_DEFAULT_HOST_URL, "/messages/custom_rule/create.json"),
     /**
-     * get.
+     * 获取自定义规则分组列表
      */
-    TAGS_GET(API_DEFAULT_HOST_URL, "/cgi-bin/tags/get"),
+    TAGS_GET(FANS_DEFAULT_HOST_URL, "/messages/custom_rule/get.json"),
     /**
      * update.
      */
-    TAGS_UPDATE(API_DEFAULT_HOST_URL, "/cgi-bin/tags/update"),
+    TAGS_UPDATE(FANS_DEFAULT_HOST_URL, "/messages/custom_rule/update.json"),
     /**
      * delete.
      */
-    TAGS_DELETE(API_DEFAULT_HOST_URL, "/cgi-bin/tags/delete"),
+    TAGS_DELETE(FANS_DEFAULT_HOST_URL, "/messages/custom_rule/delete.json"),
+
     /**
-     * get.
+     * 查询用户所在的分组
      */
-    TAG_GET(API_DEFAULT_HOST_URL, "/cgi-bin/user/tag/get"),
+    TAGS_USERTAGLIST(FANS_DEFAULT_HOST_URL, "/messages/custom_rule/getid.json"),
+
     /**
-     * batchtagging.
+     * 更新用户所在的分组
      */
-    TAGS_MEMBERS_BATCHTAGGING(API_DEFAULT_HOST_URL, "/cgi-bin/tags/members/batchtagging"),
+    TAGS_USERTAGUPDATE(FANS_DEFAULT_HOST_URL, "/messages/custom_rule/member/update.json"),
+
     /**
-     * batchuntagging.
+     * 通过uid取得用户基本信息 get
+     * https://api.weibo.com/2/eps/user/info.json
      */
-    TAGS_MEMBERS_BATCHUNTAGGING(API_DEFAULT_HOST_URL, "/cgi-bin/tags/members/batchuntagging"),
+    USER_GETUSERINFO(API_DEFAULT_HOST_URL, "/eps/user/info.json"),
+
     /**
-     * getidlist.
+     * 通过uid取得用户基本信息
+     * https://m.api.weibo.com/2/messages/subscribers/get.json
      */
-    TAGS_GETIDLIST(API_DEFAULT_HOST_URL, "/cgi-bin/tags/getidlist");
+    USER_GETSUBSCRIBERS(FANS_DEFAULT_HOST_URL, "/messages/subscribers/get.json");
+
 
     private String prefix;
     private String path;
 
     @Override
     public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum Wifi implements WeiboMpApiUrl {
-    /**
-     * list.
-     */
-    BIZWIFI_SHOP_LIST(API_DEFAULT_HOST_URL, "/bizwifi/shop/list"),
-
-    /**
-     * get.
-     */
-    BIZWIFI_SHOP_GET(API_DEFAULT_HOST_URL, "/bizwifi/shop/get"),
-
-    /**
-     * upadte.
-     */
-    BIZWIFI_SHOP_UPDATE(API_DEFAULT_HOST_URL, "/bizwifi/shop/update");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum AiOpen implements WeiboMpApiUrl {
-    /**
-     * translatecontent.
-     */
-    TRANSLATE_URL(API_DEFAULT_HOST_URL, "/cgi-bin/media/voice/translatecontent?lfrom=%s&lto=%s"),
-    /**
-     * addvoicetorecofortext.
-     */
-    VOICE_UPLOAD_URL(API_DEFAULT_HOST_URL, "/cgi-bin/media/voice/addvoicetorecofortext?format=%s&voice_id=%s&lang=%s"),
-    /**
-     * queryrecoresultfortext.
-     */
-    VOICE_QUERY_RESULT_URL(API_DEFAULT_HOST_URL, "/cgi-bin/media/voice/queryrecoresultfortext");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum Ocr implements WeiboMpApiUrl {
-    /**
-     * 身份证识别.
-     */
-    IDCARD(API_DEFAULT_HOST_URL, "/cv/ocr/idcard?img_url=%s"),
-
-    FILEIDCARD(API_DEFAULT_HOST_URL, "/cv/ocr/idcard"),
-
-    /**
-     * 银行卡OCR识别
-     */
-    BANK_CARD(API_DEFAULT_HOST_URL, "/cv/ocr/bankcard?img_url=%s"),
-
-    /**
-     * 银行卡OCR识别(文件)
-     */
-    FILE_BANK_CARD(API_DEFAULT_HOST_URL, "/cv/ocr/bankcard"),
-
-    /**
-     * 行驶证OCR识别
-     */
-    DRIVING(API_DEFAULT_HOST_URL, "/cv/ocr/driving?img_url=%s"),
-    /**
-     * 行驶证OCR识别(文件)
-     */
-    FILE_DRIVING(API_DEFAULT_HOST_URL, "/cv/ocr/driving"),
-
-    /**
-     * 驾驶证OCR识别
-     */
-    DRIVING_LICENSE(API_DEFAULT_HOST_URL, "/cv/ocr/drivinglicense?img_url=%s"),
-
-    /**
-     * 驾驶证OCR识别(文件)
-     */
-    FILE_DRIVING_LICENSE(API_DEFAULT_HOST_URL, "/cv/ocr/drivinglicense"),
-
-    /**
-     * 营业执照OCR识别
-     */
-    BIZ_LICENSE(API_DEFAULT_HOST_URL, "/cv/ocr/bizlicense?img_url=%s"),
-
-    /**
-     * 营业执照OCR识别(文件)
-     */
-    FILE_BIZ_LICENSE(API_DEFAULT_HOST_URL, "/cv/ocr/bizlicense"),
-
-    /**
-     * 通用印刷体OCR识别
-     */
-    COMM(API_DEFAULT_HOST_URL, "/cv/ocr/comm?img_url=%s"),
-
-    /**
-     * 通用印刷体OCR识别(文件)
-     */
-    FILE_COMM(API_DEFAULT_HOST_URL, "/cv/ocr/comm");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      if (config == null) {
-        return buildUrl(null, prefix, path);
-      }
-
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum Card implements WeiboMpApiUrl {
-    /**
-     * create.
-     */
-    CARD_CREATE(API_DEFAULT_HOST_URL, "/card/create"),
-    /**
-     * get.
-     */
-    CARD_GET(API_DEFAULT_HOST_URL, "/card/get"),
-    /**
-     * wx_card.
-     */
-    CARD_GET_TICKET(API_DEFAULT_HOST_URL, "/cgi-bin/ticket/getticket?type=wx_card"),
-    /**
-     * decrypt.
-     */
-    CARD_CODE_DECRYPT(API_DEFAULT_HOST_URL, "/card/code/decrypt"),
-    /**
-     * get.
-     */
-    CARD_CODE_GET(API_DEFAULT_HOST_URL, "/card/code/get"),
-    /**
-     * consume.
-     */
-    CARD_CODE_CONSUME(API_DEFAULT_HOST_URL, "/card/code/consume"),
-    /**
-     * mark.
-     */
-    CARD_CODE_MARK(API_DEFAULT_HOST_URL, "/card/code/mark"),
-    /**
-     * set.
-     */
-    CARD_TEST_WHITELIST(API_DEFAULT_HOST_URL, "/card/testwhitelist/set"),
-    /**
-     * create.
-     */
-    CARD_QRCODE_CREATE(API_DEFAULT_HOST_URL, "/card/qrcode/create"),
-    /**
-     * create.
-     */
-    CARD_LANDING_PAGE_CREATE(API_DEFAULT_HOST_URL, "/card/landingpage/create"),
-    /**
-     * 将用户的卡券设置为失效状态.
-     */
-    CARD_CODE_UNAVAILABLE(API_DEFAULT_HOST_URL, "/card/code/unavailable"),
-    /**
-     * 卡券删除.
-     */
-    CARD_DELETE(API_DEFAULT_HOST_URL, "/card/delete"),
-
-    /**
-     * 导入code接口.
-     */
-    CARD_CODE_DEPOSIT(API_DEFAULT_HOST_URL, "/card/code/deposit"),
-
-    /**
-     * 查询导入code数目接口
-     */
-    CARD_CODE_DEPOSIT_COUNT(API_DEFAULT_HOST_URL, "/card/code/getdepositcount"),
-
-    /**
-     * 核查code接口
-     */
-    CARD_CODE_CHECKCODE(API_DEFAULT_HOST_URL, "/card/code/checkcode"),
-
-    /**
-     * 图文消息群发卡券
-     */
-    CARD_MPNEWS_GETHTML(API_DEFAULT_HOST_URL, "/card/mpnews/gethtml"),
-
-    /**
-     * 修改库存接口
-     */
-    CARD_MODIFY_STOCK(API_DEFAULT_HOST_URL, "/card/modifystock"),
-
-    /**
-     * 更改Code接口
-     */
-    CARD_CODE_UPDATE(API_DEFAULT_HOST_URL, "/card/code/update"),
-
-    /**
-     * 设置买单接口
-     */
-    CARD_PAYCELL_SET(API_DEFAULT_HOST_URL, "/card/paycell/set"),
-
-    /**
-     * 设置自助核销接口
-     */
-    CARD_SELF_CONSUME_CELL_SET(API_DEFAULT_HOST_URL, "/card/selfconsumecell/set"),
-
-    /**
-     * 获取用户已领取卡券接口
-     */
-    CARD_USER_CARD_LIST(API_DEFAULT_HOST_URL, "/card/user/getcardlist"),
-    ;
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum DataCube implements WeiboMpApiUrl {
-    /**
-     * getusersummary.
-     */
-    GET_USER_SUMMARY(API_DEFAULT_HOST_URL, "/datacube/getusersummary"),
-    /**
-     * getusercumulate.
-     */
-    GET_USER_CUMULATE(API_DEFAULT_HOST_URL, "/datacube/getusercumulate"),
-    /**
-     * getarticlesummary.
-     */
-    GET_ARTICLE_SUMMARY(API_DEFAULT_HOST_URL, "/datacube/getarticlesummary"),
-    /**
-     * getarticletotal.
-     */
-    GET_ARTICLE_TOTAL(API_DEFAULT_HOST_URL, "/datacube/getarticletotal"),
-    /**
-     * getuserread.
-     */
-    GET_USER_READ(API_DEFAULT_HOST_URL, "/datacube/getuserread"),
-    /**
-     * getuserreadhour.
-     */
-    GET_USER_READ_HOUR(API_DEFAULT_HOST_URL, "/datacube/getuserreadhour"),
-    /**
-     * getusershare.
-     */
-    GET_USER_SHARE(API_DEFAULT_HOST_URL, "/datacube/getusershare"),
-    /**
-     * getusersharehour.
-     */
-    GET_USER_SHARE_HOUR(API_DEFAULT_HOST_URL, "/datacube/getusersharehour"),
-    /**
-     * getupstreammsg.
-     */
-    GET_UPSTREAM_MSG(API_DEFAULT_HOST_URL, "/datacube/getupstreammsg"),
-    /**
-     * getupstreammsghour.
-     */
-    GET_UPSTREAM_MSG_HOUR(API_DEFAULT_HOST_URL, "/datacube/getupstreammsghour"),
-    /**
-     * getupstreammsgweek.
-     */
-    GET_UPSTREAM_MSG_WEEK(API_DEFAULT_HOST_URL, "/datacube/getupstreammsgweek"),
-    /**
-     * getupstreammsgmonth.
-     */
-    GET_UPSTREAM_MSG_MONTH(API_DEFAULT_HOST_URL, "/datacube/getupstreammsgmonth"),
-    /**
-     * getupstreammsgdist.
-     */
-    GET_UPSTREAM_MSG_DIST(API_DEFAULT_HOST_URL, "/datacube/getupstreammsgdist"),
-    /**
-     * getupstreammsgdistweek.
-     */
-    GET_UPSTREAM_MSG_DIST_WEEK(API_DEFAULT_HOST_URL, "/datacube/getupstreammsgdistweek"),
-    /**
-     * getupstreammsgdistmonth.
-     */
-    GET_UPSTREAM_MSG_DIST_MONTH(API_DEFAULT_HOST_URL, "/datacube/getupstreammsgdistmonth"),
-    /**
-     * getinterfacesummary.
-     */
-    GET_INTERFACE_SUMMARY(API_DEFAULT_HOST_URL, "/datacube/getinterfacesummary"),
-    /**
-     * getinterfacesummaryhour.
-     */
-    GET_INTERFACE_SUMMARY_HOUR(API_DEFAULT_HOST_URL, "/datacube/getinterfacesummaryhour");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum Kefu implements WeiboMpApiUrl {
-    /**
-     * send.
-     */
-    MESSAGE_CUSTOM_SEND(API_DEFAULT_HOST_URL, "/cgi-bin/message/custom/send"),
-    /**
-     * getkflist.
-     */
-    GET_KF_LIST(API_DEFAULT_HOST_URL, "/cgi-bin/customservice/getkflist"),
-    /**
-     * getonlinekflist.
-     */
-    GET_ONLINE_KF_LIST(API_DEFAULT_HOST_URL, "/cgi-bin/customservice/getonlinekflist"),
-    /**
-     * add.
-     */
-    KFACCOUNT_ADD(API_DEFAULT_HOST_URL, "/customservice/kfaccount/add"),
-    /**
-     * update.
-     */
-    KFACCOUNT_UPDATE(API_DEFAULT_HOST_URL, "/customservice/kfaccount/update"),
-    /**
-     * inviteworker.
-     */
-    KFACCOUNT_INVITE_WORKER(API_DEFAULT_HOST_URL, "/customservice/kfaccount/inviteworker"),
-    /**
-     * uploadheadimg.
-     */
-    KFACCOUNT_UPLOAD_HEAD_IMG(API_DEFAULT_HOST_URL, "/customservice/kfaccount/uploadheadimg?kf_account=%s"),
-    /**
-     * del kfaccount.
-     */
-    KFACCOUNT_DEL(API_DEFAULT_HOST_URL, "/customservice/kfaccount/del?kf_account=%s"),
-    /**
-     * create.
-     */
-    KFSESSION_CREATE(API_DEFAULT_HOST_URL, "/customservice/kfsession/create"),
-    /**
-     * close.
-     */
-    KFSESSION_CLOSE(API_DEFAULT_HOST_URL, "/customservice/kfsession/close"),
-    /**
-     * getsession.
-     */
-    KFSESSION_GET_SESSION(API_DEFAULT_HOST_URL, "/customservice/kfsession/getsession?openid=%s"),
-    /**
-     * getsessionlist.
-     */
-    KFSESSION_GET_SESSION_LIST(API_DEFAULT_HOST_URL, "/customservice/kfsession/getsessionlist?kf_account=%s"),
-    /**
-     * getwaitcase.
-     */
-    KFSESSION_GET_WAIT_CASE(API_DEFAULT_HOST_URL, "/customservice/kfsession/getwaitcase"),
-    /**
-     * getmsglist.
-     */
-    MSG_RECORD_LIST(API_DEFAULT_HOST_URL, "/customservice/msgrecord/getmsglist"),
-    /**
-     * typing.
-     */
-    CUSTOM_TYPING(API_DEFAULT_HOST_URL, "/cgi-bin/message/custom/typing");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
+      return prefix + path;
     }
   }
 
@@ -814,7 +280,7 @@ public interface WeiboMpApiUrl {
 
     @Override
     public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
+      return prefix + path;
     }
   }
 
@@ -870,173 +336,10 @@ public interface WeiboMpApiUrl {
 
     @Override
     public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
+      return prefix + path;
     }
   }
 
-  @AllArgsConstructor
-  enum MemberCard implements WeiboMpApiUrl {
-    /**
-     * create.
-     */
-    MEMBER_CARD_CREATE(API_DEFAULT_HOST_URL, "/card/create"),
-    /**
-     * activate.
-     */
-    MEMBER_CARD_ACTIVATE(API_DEFAULT_HOST_URL, "/card/membercard/activate"),
-    /**
-     * get userinfo.
-     */
-    MEMBER_CARD_USER_INFO_GET(API_DEFAULT_HOST_URL, "/card/membercard/userinfo/get"),
-    /**
-     * updateuser.
-     */
-    MEMBER_CARD_UPDATE_USER(API_DEFAULT_HOST_URL, "/card/membercard/updateuser"),
-    /**
-     * 会员卡激活之微博开卡接口(wx_activate=true情况调用).
-     */
-    MEMBER_CARD_ACTIVATE_USER_FORM(API_DEFAULT_HOST_URL, "/card/membercard/activateuserform/set"),
-    /**
-     * 获取会员卡开卡插件参数.
-     */
-    MEMBER_CARD_ACTIVATE_URL(API_DEFAULT_HOST_URL, "/card/membercard/activate/geturl"),
-    /**
-     * 会员卡信息更新.
-     */
-    MEMBER_CARD_UPDATE(API_DEFAULT_HOST_URL, "/card/update"),
-    /**
-     * 跳转型会员卡开卡字段.
-     * 获取用户提交资料(wx_activate=true情况调用),开发者根据activate_ticket获取到用户填写的信息
-     */
-    MEMBER_CARD_ACTIVATE_TEMP_INFO(API_DEFAULT_HOST_URL, "/card/membercard/activatetempinfo/get");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum Store implements WeiboMpApiUrl {
-    /**
-     * getwxcategory.
-     */
-    POI_GET_WX_CATEGORY_URL(API_DEFAULT_HOST_URL, "/cgi-bin/poi/getwxcategory"),
-    /**
-     * updatepoi.
-     */
-    POI_UPDATE_URL(API_DEFAULT_HOST_URL, "/cgi-bin/poi/updatepoi"),
-    /**
-     * getpoilist.
-     */
-    POI_LIST_URL(API_DEFAULT_HOST_URL, "/cgi-bin/poi/getpoilist"),
-    /**
-     * delpoi.
-     */
-    POI_DEL_URL(API_DEFAULT_HOST_URL, "/cgi-bin/poi/delpoi"),
-    /**
-     * getpoi.
-     */
-    POI_GET_URL(API_DEFAULT_HOST_URL, "/cgi-bin/poi/getpoi"),
-    /**
-     * addpoi.
-     */
-    POI_ADD_URL(API_DEFAULT_HOST_URL, "/cgi-bin/poi/addpoi");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum User implements WeiboMpApiUrl {
-    /**
-     * batchget.
-     */
-    USER_INFO_BATCH_GET_URL(API_DEFAULT_HOST_URL, "/cgi-bin/user/info/batchget"),
-    /**
-     * get.
-     */
-    USER_GET_URL(API_DEFAULT_HOST_URL, "/cgi-bin/user/get"),
-    /**
-     * info.
-     */
-    USER_INFO_URL(API_DEFAULT_HOST_URL, "/cgi-bin/user/info"),
-    /**
-     * updateremark.
-     */
-    USER_INFO_UPDATE_REMARK_URL(API_DEFAULT_HOST_URL, "/cgi-bin/user/info/updateremark"),
-    /**
-     * changeopenid.
-     */
-    USER_CHANGE_OPENID_URL(API_DEFAULT_HOST_URL, "/cgi-bin/changeopenid");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
-
-  @AllArgsConstructor
-  enum Comment implements WeiboMpApiUrl {
-    /**
-     * 打开已群发文章评论.
-     */
-    OPEN(API_DEFAULT_HOST_URL, "/cgi-bin/comment/open"),
-
-    /**
-     * 关闭已群发文章评论.
-     */
-    CLOSE(API_DEFAULT_HOST_URL, "/cgi-bin/comment/close"),
-
-    /**
-     * 查看指定文章的评论数据.
-     */
-    LIST(API_DEFAULT_HOST_URL, "/cgi-bin/comment/list"),
-
-    /**
-     * 将评论标记精选.
-     */
-    MARK_ELECT(API_DEFAULT_HOST_URL, "/cgi-bin/comment/markelect"),
-
-    /**
-     * 将评论取消精选.
-     */
-    UNMARK_ELECT(API_DEFAULT_HOST_URL, "/cgi-bin/comment/unmarkelect"),
-
-    /**
-     * 删除评论.
-     */
-    DELETE(API_DEFAULT_HOST_URL, "/cgi-bin/comment/delete"),
-
-    /**
-     * 回复评论.
-     */
-    REPLY_ADD(API_DEFAULT_HOST_URL, "/cgi-bin/comment/reply/add"),
-
-    /**
-     * 删除回复.
-     */
-    REPLY_DELETE(API_DEFAULT_HOST_URL, "/cgi-bin/comment/reply/delete");
-
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
 
   @AllArgsConstructor
   enum ImgProc implements WeiboMpApiUrl {
@@ -1075,85 +378,9 @@ public interface WeiboMpApiUrl {
 
     @Override
     public String getUrl(WeiboConfigStorage config) {
-      if (null == config) {
-        return buildUrl(null, prefix, path);
-      }
-      return buildUrl(config.getHostConfig(), prefix, path);
+      return prefix + path;
     }
   }
 
-  @AllArgsConstructor
-  enum Invoice implements WeiboMpApiUrl {
 
-    /**
-     * 获取用户开票授权地址
-     */
-    GET_AUTH_URL(API_DEFAULT_HOST_URL, "/card/invoice/getauthurl"),
-
-    /**
-     * 获取用户开票授权信息
-     */
-    GET_AUTH_DATA(API_DEFAULT_HOST_URL, "/card/invoice/getauthdata"),
-
-    /**
-     * 拒绝为用户开票
-     */
-    REJECT_INSERT(API_DEFAULT_HOST_URL, "/card/invoice/rejectinsert"),
-
-    /**
-     * 开票
-     */
-    MAKE_OUT_INVOICE(API_DEFAULT_HOST_URL, "/card/invoice/makeoutinvoice"),
-
-    /**
-     * 发票冲红
-     */
-    CLEAR_OUT_INVOICE(API_DEFAULT_HOST_URL, "/card/invoice/clearoutinvoice"),
-
-    /**
-     * 查询发票信息
-     */
-    QUERY_INVOICE_INFO(API_DEFAULT_HOST_URL, "/card/invoice/queryinvoceinfo"),
-
-    /**
-     * 设置商户信息联系
-     */
-    SET_CONTACT_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=set_contact"),
-
-    /**
-     * 获取商户联系信息
-     */
-    GET_CONTACT_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=get_contact"),
-
-    /**
-     * 设置授权页面字段
-     */
-    SET_AUTH_FIELD_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=set_auth_field"),
-
-    /**
-     * 获取授权页面字段
-     */
-    GET_AUTH_FIELD_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=get_auth_field"),
-
-    /**
-     * 设置关联商户
-     */
-    SET_PAY_MCH_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=set_pay_mch"),
-
-    /**
-     * 获取关联商户
-     */
-    GET_PAY_MCH_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=get_pay_mch"),
-    ;
-    private String prefix;
-    private String path;
-
-    @Override
-    public String getUrl(WeiboConfigStorage config) {
-      if (null == config) {
-        return buildUrl(null, prefix, path);
-      }
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
-  }
 }

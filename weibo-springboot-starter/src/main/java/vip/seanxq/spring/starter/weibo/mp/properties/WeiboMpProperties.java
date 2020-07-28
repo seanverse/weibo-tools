@@ -2,6 +2,7 @@ package vip.seanxq.spring.starter.weibo.mp.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import vip.seanxq.weibo.common.enums.WbMessageFormat;
 
 import java.io.Serializable;
 
@@ -40,6 +41,11 @@ public class WeiboMpProperties {
   private String aesKey;
 
   /**
+   * 设置消息的格式，weibo默认为json，兼容时为xml
+   */
+  private WbMessageFormat messageFormat = WbMessageFormat.XML;
+
+  /**
    * 存储策略
    */
   private ConfigStorage configStorage = new ConfigStorage();
@@ -53,10 +59,12 @@ public class WeiboMpProperties {
      */
     private StorageType type = memory;
 
+
+
     /**
      * 指定key前缀.
      */
-    private String keyPrefix = "wx";
+    private String keyPrefix = "weibo";
 
     /**
      * redis连接配置.

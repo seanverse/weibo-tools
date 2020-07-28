@@ -2,17 +2,16 @@ package vip.seanxq.weibo.mp.api;
 
 import vip.seanxq.weibo.common.bean.WeiboJsapiSignature;
 import vip.seanxq.weibo.common.bean.WeiboNetCheckResult;
+import vip.seanxq.weibo.common.enums.WbMessageFormat;
 import vip.seanxq.weibo.common.error.WeiboErrorException;
 import vip.seanxq.weibo.common.service.WeiboService;
 import vip.seanxq.weibo.common.util.http.MediaUploadRequestExecutor;
 import vip.seanxq.weibo.common.util.http.RequestExecutor;
 import vip.seanxq.weibo.common.util.http.RequestHttp;
 import vip.seanxq.weibo.common.util.http.apache.ApacheHttpClientBuilder;
-import vip.seanxq.weibo.mp.bean.WeiboMpSemanticQuery;
 import vip.seanxq.weibo.mp.bean.result.WeiboMpCurrentAutoReplyInfo;
 import vip.seanxq.weibo.mp.bean.result.WeiboMpOAuth2AccessToken;
-import vip.seanxq.weibo.mp.bean.result.WeiboMpSemanticQueryResult;
-import vip.seanxq.weibo.mp.bean.result.WeiboMpUser;
+import vip.seanxq.weibo.mp.bean.result.WeiboFansUser;
 import vip.seanxq.weibo.mp.config.WeiboConfigStorage;
 import vip.seanxq.weibo.common.enums.TicketType;
 import vip.seanxq.weibo.mp.enums.WeiboMpApiUrl;
@@ -25,6 +24,15 @@ import java.util.Map;
  * @author chanjarster
  */
 public interface WeiboMpService extends WeiboService {
+
+  /**
+   * 微博消息推送服务完全兼容“微信XML格式”，以方便基于微信公众平台做了开发的第三方能够更为顺畅得迁移；
+   * 第三方可以通过http://open.weibo.com/wiki/Eps/push/set_format 接口来选择自己需要的格式是XML还是JSON
+   * @param format xml/json
+   * @return 设定执行成功状态
+   */
+  boolean setDataFormat(WbMessageFormat format) throws WeiboErrorException;
+
   /**
    * <pre>
    * 验证消息的确来自微博服务器.
@@ -208,7 +216,7 @@ public interface WeiboMpService extends WeiboService {
    * @return 用户对象
    * @throws WeiboErrorException .
    */
-  WeiboMpUser oauth2getUserInfo(WeiboMpOAuth2AccessToken oAuth2AccessToken, String lang) throws WeiboErrorException;
+  WeiboFansUser oauth2getUserInfo(WeiboMpOAuth2AccessToken oAuth2AccessToken, String lang) throws WeiboErrorException;
 
   /**
    * <pre>
@@ -416,30 +424,30 @@ public interface WeiboMpService extends WeiboService {
   /**
    * 返回菜单相关接口方法的实现类对象，以方便调用其各个接口.
    *
-   * @return WeibMpMenuService
+   * @return WeibCustomMenuService
    */
-  WeibMpMenuService getMenuService();
+  WeibCustomMenuService getMenuService();
 
   /**
    * 返回用户相关接口方法的实现类对象，以方便调用其各个接口.
    *
-   * @return WeiboMpUserService
+   * @return WeiboFansUserService
    */
-  WeiboMpUserService getUserService();
+  WeiboFansUserService getUserService();
 
   /**
    * 返回用户标签相关接口方法的实现类对象，以方便调用其各个接口.
    *
-   * @return WeiboMpUserTagService
+   * @return WeiboFansTagService
    */
-  WeiboMpUserTagService getUserTagService();
+  WeiboFansTagService getUserTagService();
 
   /**
    * 返回二维码相关接口方法的实现类对象，以方便调用其各个接口.
    *
-   * @return WeibMpQrcodeService
+   * @return WeiboFansQrcodeService
    */
-  WeibMpQrcodeService getQrcodeService();
+  WeiboFansQrcodeService getQrcodeService();
 
   /**
    * 返回数据分析统计相关接口方法的实现类对象，以方便调用其各个接口.
@@ -477,9 +485,9 @@ public interface WeiboMpService extends WeiboService {
   /**
    * 返回群发消息相关接口方法的实现类对象，以方便调用其各个接口.
    *
-   * @return WeibMpMassMessageService
+   * @return WeibFansMassMessageService
    */
-  WeibMpMassMessageService getMassMessageService();
+  WeibFansMassMessageService getMassMessageService();
 
   /**
    * 返回图像处理接口的实现类对象，以方便调用其各个接口.
@@ -500,28 +508,28 @@ public interface WeiboMpService extends WeiboService {
    *
    * @param menuService .
    */
-  void setMenuService(WeibMpMenuService menuService);
+  void setMenuService(WeibCustomMenuService menuService);
 
   /**
    * .
    *
    * @param userService .
    */
-  void setUserService(WeiboMpUserService userService);
+  void setUserService(WeiboFansUserService userService);
 
   /**
    * .
    *
-   * @param tagService .
+   * @param userGroupService .
    */
-  void setTagService(WeiboMpUserTagService tagService);
+  void setUserGroupService(WeiboFansTagService userGroupService);
 
   /**
    * .
    *
    * @param qrCodeService .
    */
-  void setQrCodeService(WeibMpQrcodeService qrCodeService);
+  void setQrCodeService(WeiboFansQrcodeService qrCodeService);
 
   /**
    * .
@@ -542,7 +550,7 @@ public interface WeiboMpService extends WeiboService {
    *
    * @param massMessageService .
    */
-  void setMassMessageService(WeibMpMassMessageService massMessageService);
+  void setMassMessageService(WeibFansMassMessageService massMessageService);
 
   /**
    * .

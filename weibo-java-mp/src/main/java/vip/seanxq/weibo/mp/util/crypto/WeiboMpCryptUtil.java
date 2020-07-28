@@ -30,9 +30,9 @@ public class WeiboMpCryptUtil extends WxCryptUtil {
    */
   public WeiboMpCryptUtil(WeiboConfigStorage weiboConfigStorage) {
     /*
-     * @param token          公众平台上，开发者设置的token
-     * @param encodingAesKey 公众平台上，开发者设置的EncodingAESKey
-     * @param appId          公众平台appid
+     * @param token          服务平台上，开发者设置的token
+     * @param encodingAesKey 服务平台上，开发者设置的EncodingAESKey
+     * @param appId          服务平台appid
      */
     String encodingAesKey = weiboConfigStorage.getAesKey();
     String token = weiboConfigStorage.getToken();

@@ -22,13 +22,12 @@ public class WeiboMenuButton implements Serializable {
    * 菜单的响应动作类型.
    * view表示网页类型，
    * click表示点击类型，
-   * miniprogram表示小程序类型
    * </pre>
    */
   private String type;
 
   /**
-   * 菜单标题，不超过16个字节，子菜单不超过60个字节.
+   * 菜单标题，不超过16个字节，子菜单不超过40个字节.
    */
   private String name;
 
@@ -43,38 +42,10 @@ public class WeiboMenuButton implements Serializable {
   /**
    * <pre>
    * 网页链接.
-   * 用户点击菜单可打开链接，不超过1024字节。type为miniprogram时，不支持小程序的老版本客户端将打开本url。
-   * view、miniprogram类型必须
+   * 用户点击菜单可打开链接，不超过256字节。view类型必须
    * </pre>
    */
   private String url;
-
-  /**
-   * <pre>
-   * 调用新增永久素材接口返回的合法media_id.
-   * media_id类型和view_limited类型必须
-   * </pre>
-   */
-  @SerializedName("media_id")
-  private String mediaId;
-
-  /**
-   * <pre>
-   * 小程序的appid.
-   * miniprogram类型必须
-   * </pre>
-   */
-  @SerializedName("appid")
-  private String appId;
-
-  /**
-   * <pre>
-   * 小程序的页面路径.
-   * miniprogram类型必须
-   * </pre>
-   */
-  @SerializedName("pagepath")
-  private String pagePath;
 
   @SerializedName("sub_button")
   private List<WeiboMenuButton> subButtons = new ArrayList<>();

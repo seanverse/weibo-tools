@@ -9,8 +9,8 @@ import vip.seanxq.weibo.common.error.WeiboError;
 import vip.seanxq.weibo.common.bean.result.WeiboMediaUploadResult;
 
 /**
- * .
- * @author chanjarster
+ * WeiboGsonBuilder
+ *
  */
 public class WeiboGsonBuilder {
 

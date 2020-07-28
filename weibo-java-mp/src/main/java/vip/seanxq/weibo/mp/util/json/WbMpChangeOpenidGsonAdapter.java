@@ -6,7 +6,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import vip.seanxq.weibo.common.util.json.GsonHelper;
-import vip.seanxq.weibo.mp.bean.result.WeiboMpChangeOpenid;
 
 import java.lang.reflect.Type;
 
