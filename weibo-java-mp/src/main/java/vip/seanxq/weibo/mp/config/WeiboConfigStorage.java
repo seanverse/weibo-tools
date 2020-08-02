@@ -10,8 +10,7 @@ import java.util.concurrent.locks.Lock;
 
 /**
  * 微博客户端配置存储.
- *
- * @author chanjarster
+ * *
  */
 public interface WeiboConfigStorage {
 
@@ -35,7 +34,7 @@ public interface WeiboConfigStorage {
   /**
    * 应该是线程安全的.
    *
-   * @param accessToken 要更新的WxAccessToken对象
+   * @param accessToken 要更新的WeiboAccessToken对象
    */
   void updateAccessToken(WeiboAccessToken accessToken);
 

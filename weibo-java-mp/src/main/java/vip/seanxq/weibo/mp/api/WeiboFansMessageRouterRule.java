@@ -1,11 +1,14 @@
 package vip.seanxq.weibo.mp.api;
 
+import lombok.Getter;
+import lombok.Setter;
 import vip.seanxq.weibo.common.api.WeiboErrorExceptionHandler;
+import vip.seanxq.weibo.common.enums.MsgType;
 import vip.seanxq.weibo.common.error.WeiboErrorException;
 import vip.seanxq.weibo.common.session.WeiboSessionManager;
-import vip.seanxq.weibo.mp.bean.message.WeiboMpXmlMessage;
-import vip.seanxq.weibo.mp.bean.message.WeiboMpXmlOutMessage;
 import org.apache.commons.lang3.StringUtils;
+import vip.seanxq.weibo.mp.bean.message.EventSubType;
+import vip.seanxq.weibo.mp.bean.message.WeiboReceiveMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,25 +16,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+@Setter
+@Getter
 public class WeiboFansMessageRouterRule {
 
   private final WeiboFansMessageRouter routerBuilder;
 
   private boolean async = true;
 
-  private String fromUser;
+  private String senderId;
 
-  private String msgType;
+  private MsgType msgType;
 
-  private String event;
+  private String text;
+  private String text_Regex;
 
-  private String eventKey;
+  private EventSubType eventSubType;
 
-  private String eventKeyRegex;
+  private String event_dataKey;
 
-  private String content;
-
-  private String rContent;
+  private String event_dataKey_Regex;
 
   private WeiboFansMessageMatcher matcher;
 
@@ -56,24 +60,25 @@ public class WeiboFansMessageRouterRule {
   /**
    * 如果msgType等于某值
    */
-  public WeiboFansMessageRouterRule msgType(String msgType) {
-    this.msgType = msgType;
+  public WeiboFansMessageRouterRule msgType(MsgType msgType) {
+    this.msgType =  msgType;
     return this;
   }
 
   /**
    * 如果event等于某值
    */
-  public WeiboFansMessageRouterRule event(String event) {
-    this.event = event;
+  public WeiboFansMessageRouterRule event(EventSubType event) {
+    this.eventSubType = event;
     return this;
   }
 
   /**
    * 如果eventKey等于某值
    */
-  public WeiboFansMessageRouterRule eventKey(String eventKey) {
-    this.eventKey = eventKey;
+  public WeiboFansMessageRouterRule eventKey(EventSubType event, String eventKey) {
+    this.eventSubType = event;
+    this.event_dataKey = eventKey;
     return this;
   }
 
@@ -81,31 +86,31 @@ public class WeiboFansMessageRouterRule {
    * 如果eventKey匹配该正则表达式
    */
   public WeiboFansMessageRouterRule eventKeyRegex(String regex) {
-    this.eventKeyRegex = regex;
+    this.event_dataKey_Regex = regex;
     return this;
   }
 
   /**
    * 如果content等于某值
    */
-  public WeiboFansMessageRouterRule content(String content) {
-    this.content = content;
+  public WeiboFansMessageRouterRule content(String text) {
+    this.text = text;
     return this;
   }
 
   /**
    * 如果content匹配该正则表达式
    */
-  public WeiboFansMessageRouterRule rContent(String regex) {
-    this.rContent = regex;
+  public WeiboFansMessageRouterRule rContent(String text_regex) {
+    this.text_Regex = text_regex;
     return this;
   }
 
   /**
    * 如果fromUser等于某值
    */
-  public WeiboFansMessageRouterRule fromUser(String fromUser) {
-    this.fromUser = fromUser;
+  public WeiboFansMessageRouterRule fromUser(String fromUserId) {
+    this.senderId = fromUserId;
     return this;
   }
 
@@ -177,33 +182,33 @@ public class WeiboFansMessageRouterRule {
    * 将微博自定义的事件修正为不区分大小写,
    * 比如框架定义的事件常量为click，但微博传递过来的却是CLICK
    */
-  protected boolean test(WeiboMpXmlMessage wxMessage) {
+  protected boolean test(WeiboReceiveMessage wbMessage) {
     return
-      (this.fromUser == null || this.fromUser.equals(wxMessage.getFromUser()))
+      (this.senderId == null || this.senderId.equals(wbMessage.getSenderId()))
         &&
-        (this.msgType == null || this.msgType.equalsIgnoreCase(wxMessage.getMsgType()))
+        (this.msgType == null || this.msgType == wbMessage.getType())
         &&
-        (this.event == null || this.event.equalsIgnoreCase(wxMessage.getEvent()))
+        (this.eventSubType == null || this.eventSubType==wbMessage.getEventData().getSubType())
         &&
-        (this.eventKey == null || this.eventKey.equalsIgnoreCase(wxMessage.getEventKey()))
+        (this.event_dataKey == null || this.event_dataKey.equalsIgnoreCase(wbMessage.getEventData().getDataKey()))
         &&
-        (this.eventKeyRegex == null || Pattern.matches(this.eventKeyRegex, StringUtils.trimToEmpty(wxMessage.getEventKey())))
+        (this.event_dataKey_Regex == null || Pattern.matches(this.event_dataKey_Regex, StringUtils.trimToEmpty(wbMessage.getEventData().getDataKey())))
         &&
-        (this.content == null || this.content.equals(StringUtils.trimToNull(wxMessage.getContent())))
+        (this.text == null || this.text.equals(StringUtils.trimToNull(wbMessage.getText())))
         &&
-        (this.rContent == null || Pattern.matches(this.rContent, StringUtils.trimToEmpty(wxMessage.getContent())))
+        (this.text_Regex == null || Pattern.matches(this.text_Regex, StringUtils.trimToEmpty(wbMessage.getText())))
         &&
-        (this.matcher == null || this.matcher.match(wxMessage))
+        (this.matcher == null || this.matcher.match(wbMessage))
       ;
   }
 
   /**
    * 处理微博推送过来的消息
    *
-   * @param wxMessage
+   * @param wbMessage
    * @return true 代表继续执行别的router，false 代表停止执行别的router
    */
-  protected WeiboMpXmlOutMessage service(WeiboMpXmlMessage wxMessage,
+  protected WeiboReceiveMessage service(WeiboReceiveMessage wbMessage,
                                          Map<String, Object> context,
                                          WeiboMpService wxMpService,
                                          WeiboSessionManager sessionManager,
@@ -216,19 +221,19 @@ public class WeiboFansMessageRouterRule {
     try {
       // 如果拦截器不通过
       for (WeiboFansMessageInterceptor interceptor : this.interceptors) {
-        if (!interceptor.intercept(wxMessage, context, wxMpService, sessionManager)) {
+        if (!interceptor.intercept(wbMessage, context, wxMpService, sessionManager)) {
           return null;
         }
       }
 
       // 交给handler处理
-      WeiboMpXmlOutMessage res = null;
+      WeiboReceiveMessage res = null;
       for (WeiboFansMessageHandler handler : this.handlers) {
         // 返回最后handler的结果
         if (handler == null) {
           continue;
         }
-        res = handler.handle(wxMessage, context, wxMpService, sessionManager);
+        res = handler.handle(wbMessage, context, wxMpService, sessionManager);
       }
       return res;
     } catch (WeiboErrorException e) {
@@ -242,91 +247,5 @@ public class WeiboFansMessageRouterRule {
     return this.routerBuilder;
   }
 
-  public boolean isAsync() {
-    return this.async;
-  }
 
-  public void setAsync(boolean async) {
-    this.async = async;
-  }
-
-  public String getFromUser() {
-    return this.fromUser;
-  }
-
-  public void setFromUser(String fromUser) {
-    this.fromUser = fromUser;
-  }
-
-  public String getMsgType() {
-    return this.msgType;
-  }
-
-  public void setMsgType(String msgType) {
-    this.msgType = msgType;
-  }
-
-  public String getEvent() {
-    return this.event;
-  }
-
-  public void setEvent(String event) {
-    this.event = event;
-  }
-
-  public String getEventKey() {
-    return this.eventKey;
-  }
-
-  public void setEventKey(String eventKey) {
-    this.eventKey = eventKey;
-  }
-
-  public String getContent() {
-    return this.content;
-  }
-
-  public void setContent(String content) {
-    this.content = content;
-  }
-
-  public String getrContent() {
-    return this.rContent;
-  }
-
-  public void setrContent(String rContent) {
-    this.rContent = rContent;
-  }
-
-  public WeiboFansMessageMatcher getMatcher() {
-    return this.matcher;
-  }
-
-  public void setMatcher(WeiboFansMessageMatcher matcher) {
-    this.matcher = matcher;
-  }
-
-  public boolean isReEnter() {
-    return this.reEnter;
-  }
-
-  public void setReEnter(boolean reEnter) {
-    this.reEnter = reEnter;
-  }
-
-  public List<WeiboFansMessageHandler> getHandlers() {
-    return this.handlers;
-  }
-
-  public void setHandlers(List<WeiboFansMessageHandler> handlers) {
-    this.handlers = handlers;
-  }
-
-  public List<WeiboFansMessageInterceptor> getInterceptors() {
-    return this.interceptors;
-  }
-
-  public void setInterceptors(List<WeiboFansMessageInterceptor> interceptors) {
-    this.interceptors = interceptors;
-  }
 }

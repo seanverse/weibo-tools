@@ -7,6 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -40,16 +44,60 @@ public class DataUtils {
    * @param json 对象
    * @return http query查询组合字符串
    */
-  public static String JsonObjectToHttpParam(JsonObject json) throws UnsupportedEncodingException {
+  public static String JsonObjectToHttpParam(JsonObject json) {
     StringJoiner builder = new StringJoiner("&");
     if (json != null && (json.size() > 0)) {
-      for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
-        JsonElement el = entry.getValue();
-        if (el != null && el.isJsonNull())
-          builder.add(String.format("%s = %s", entry.getKey(),
-            URLEncoder.encode(el.getAsString(), "UTF-8")));
+      try {
+        for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
+          JsonElement el = entry.getValue();
+          if (el != null && el.isJsonNull())
+            builder.add(String.format("%s = %s", entry.getKey(),
+              URLEncoder.encode(el.getAsString(), "UTF-8")));
+        }
+      } catch (UnsupportedEncodingException e) {
+        throw new RuntimeException(e.getMessage());
       }
     }
+
     return builder.toString();
+  }
+
+  //类似Thu May 18 2017 00:00:00 GMT+0800 (中国标准时间)格式的时间转换成2017/05/18 或取其时分秒，方法如下：
+
+  /**
+   * @param gmtStr Thu May 18 2017 00:00:00 GMT+0800 (中国标准时间)
+   * @return 年月日;
+   */
+  public static String parseDate(String gmtStr) {
+    gmtStr = gmtStr.replace("GMT", "").replaceAll("\\(.*\\)", "");
+    //将字符串转化为date类型，格式2016-10-12
+    SimpleDateFormat format = new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss z", Locale.ENGLISH);
+    Date dateTrans = null;
+    try {
+      dateTrans = format.parse(gmtStr);
+      return new SimpleDateFormat("yyyy-MM-dd").format(dateTrans).replace("-","/");
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+    return gmtStr;
+
+  }
+
+  /**
+   * @param gmtStr "Tue Jul 12 12:10:11 GMT+08:00 2016";
+   * @return 时分秒
+   */
+  public static String parseTime(String gmtStr) {
+
+    gmtStr = gmtStr.replace("GMT", "").replaceAll("\\(.*\\)", "");
+    SimpleDateFormat format = new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss z", Locale.ENGLISH);
+    Date dateTrans = null;
+    try {
+      dateTrans = format.parse(gmtStr);
+      return new SimpleDateFormat("HH:mm:ss").format(dateTrans);
+    } catch (ParseException e) {
+      e.printStackTrace();
+    }
+    return gmtStr;
   }
 }

@@ -46,15 +46,11 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   private static final JsonParser JSON_PARSER = new JsonParser();
 
   protected WeiboSessionManager sessionManager = new StandardSessionManager();
-  private WeiboMpMaterialService materialService = new WeiboMpMaterialServiceImpl(this);
   private WeibCustomMenuService menuService = new WeibCustomMenuServiceImpl(this);
   private WeiboFansUserService userService = new WeiboFansUserServiceImpl(this);
-  private WeiboFansTagService userGroupService = new WeiboFansTagServiceImpl(this);
+  private WeiboFansGroupService userGroupService = new WeiboFansGroupServiceImpl(this);
   private WeiboFansQrcodeService qrCodeService = new WeiboFansQrcodeServiceImpl(this);
-  private WeiboMpUserBlacklistService blackListService = new WeiboMpUserBlacklistServiceImpl(this);
-  private final WeiboMpSubscribeMsgService subscribeMsgService = new WeiboMpSubscribeMsgServiceImpl(this);
-  private WeibFansMassMessageService massMessageService = new WeibFansMassMessageServiceImpl(this);
-
+  private WeiboFansMessageService messageService = new WeiboFansMessageServiceImpl(this);
 
   private Map<String, WeiboConfigStorage> configStorageMap;
 
@@ -62,11 +58,13 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   private int maxRetryTimes = 5;
 
   /**
+   * Service的实现只以json格式方式实现，不支持xml
    * https://open.weibo.com/wiki/Eps/push/set_format
    * @param format xml/json
    * @throws WeiboErrorException error
    */
   @Override
+  @Deprecated
   public boolean setDataFormat(WbMessageFormat format) throws WeiboErrorException {
       //WbMessageFormat format = this.getWxMpConfigStorage().getMessageFormat();
     JsonObject jsonObject = new JsonObject();
@@ -89,184 +87,8 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   }
 
   @Override
-  public String getTicket(TicketType type) throws WeiboErrorException {
-    return this.getTicket(type, false);
-  }
-
-  @Override
-  public String getTicket(TicketType type, boolean forceRefresh) throws WeiboErrorException {
-    Lock lock = this.getWxMpConfigStorage().getTicketLock(type);
-    try {
-      lock.lock();
-      if (forceRefresh) {
-        this.getWxMpConfigStorage().expireTicket(type);
-      }
-
-      if (this.getWxMpConfigStorage().isTicketExpired(type)) {
-        String responseContent = execute(SimpleGetRequestExecutor.create(this),
-          WeiboMpApiUrl.Other.GET_TICKET_URL.getUrl(this.getWxMpConfigStorage()) + type.getCode(), null);
-        JsonObject tmpJsonObject = JSON_PARSER.parse(responseContent).getAsJsonObject();
-        String jsapiTicket = tmpJsonObject.get("ticket").getAsString();
-        int expiresInSeconds = tmpJsonObject.get("expires_in").getAsInt();
-        this.getWxMpConfigStorage().updateTicket(type, jsapiTicket, expiresInSeconds);
-      }
-    } finally {
-      lock.unlock();
-    }
-
-    return this.getWxMpConfigStorage().getTicket(type);
-  }
-
-  @Override
-  public String getJsapiTicket() throws WeiboErrorException {
-    return this.getJsapiTicket(false);
-  }
-
-  @Override
-  public String getJsapiTicket(boolean forceRefresh) throws WeiboErrorException {
-    return this.getTicket(TicketType.JSAPI, forceRefresh);
-  }
-
-  @Override
-  public WeiboJsapiSignature createJsapiSignature(String url) throws WeiboErrorException {
-    long timestamp = System.currentTimeMillis() / 1000;
-    String randomStr = RandomUtils.getRandomStr();
-    String jsapiTicket = getJsapiTicket(false);
-    String signature = SHA1.genWithAmple("jsapi_ticket=" + jsapiTicket,
-      "noncestr=" + randomStr, "timestamp=" + timestamp, "url=" + url);
-    WeiboJsapiSignature jsapiSignature = new WeiboJsapiSignature();
-    jsapiSignature.setAppId(this.getWxMpConfigStorage().getAppId());
-    jsapiSignature.setTimestamp(timestamp);
-    jsapiSignature.setNonceStr(randomStr);
-    jsapiSignature.setUrl(url);
-    jsapiSignature.setSignature(signature);
-    return jsapiSignature;
-  }
-
-  @Override
   public String getAccessToken() throws WeiboErrorException {
     return getAccessToken(false);
-  }
-
-  @Override
-  public String shortUrl(String longUrl) throws WeiboErrorException {
-    if (longUrl.contains("&access_token=")) {
-      throw new WeiboErrorException(WeiboError.builder().errorCode(-1)
-        .errorMsg("要转换的网址中存在非法字符｛&access_token=｝，会导致微博接口报错，属于微博bug，请调整地址，否则不建议使用此方法！")
-        .build());
-    }
-
-    JsonObject o = new JsonObject();
-    o.addProperty("action", "long2short");
-    o.addProperty("long_url", longUrl);
-    String responseContent = this.post(WeiboMpApiUrl.Other.SHORTURL_API_URL, o.toString());
-    JsonElement tmpJsonElement = JSON_PARSER.parse(responseContent);
-    return tmpJsonElement.getAsJsonObject().get("short_url").getAsString();
-  }
-
-  @Override
-  public WeiboMpSemanticQueryResult semanticQuery(WeiboMpSemanticQuery semanticQuery) throws WeiboErrorException {
-    String responseContent = this.post(WeiboMpApiUrl.Other.SEMANTIC_SEMPROXY_SEARCH_URL, semanticQuery.toJson());
-    return WeiboMpSemanticQueryResult.fromJson(responseContent);
-  }
-
-  @Override
-  public String oauth2buildAuthorizationUrl(String redirectURI, String scope, String state) {
-    return String.format(WeiboMpApiUrl.Other.CONNECT_OAUTH2_AUTHORIZE_URL.getUrl(this.getWxMpConfigStorage()),
-      this.getWxMpConfigStorage().getAppId(), URIUtil.encodeURIComponent(redirectURI), scope, StringUtils.trimToEmpty(state));
-  }
-
-  @Override
-  public String buildQrConnectUrl(String redirectURI, String scope, String state) {
-    return String.format(WeiboMpApiUrl.Other.QRCONNECT_URL.getUrl(this.getWxMpConfigStorage()), this.getWxMpConfigStorage().getAppId(),
-      URIUtil.encodeURIComponent(redirectURI), scope, StringUtils.trimToEmpty(state));
-  }
-
-  private WeiboMpOAuth2AccessToken getOAuth2AccessToken(String url) throws WeiboErrorException {
-    try {
-      RequestExecutor<String, String> executor = SimpleGetRequestExecutor.create(this);
-      String responseText = executor.execute(url, null, WeiboType.MP);
-      return WeiboMpOAuth2AccessToken.fromJson(responseText);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public WeiboMpOAuth2AccessToken oauth2getAccessToken(String code) throws WeiboErrorException {
-    String url = String.format(WeiboMpApiUrl.Other.OAUTH2_ACCESS_TOKEN_URL.getUrl(this.getWxMpConfigStorage()), this.getWxMpConfigStorage().getAppId(),
-      this.getWxMpConfigStorage().getSecret(), code);
-    return this.getOAuth2AccessToken(url);
-  }
-
-  @Override
-  public WeiboMpOAuth2AccessToken oauth2refreshAccessToken(String refreshToken) throws WeiboErrorException {
-    String url = String.format(WeiboMpApiUrl.Other.OAUTH2_REFRESH_TOKEN_URL.getUrl(this.getWxMpConfigStorage()), this.getWxMpConfigStorage().getAppId(), refreshToken);
-    return this.getOAuth2AccessToken(url);
-  }
-
-  @Override
-  public WeiboFansUser oauth2getUserInfo(WeiboMpOAuth2AccessToken token, String lang) throws WeiboErrorException {
-    if (lang == null) {
-      lang = "zh_CN";
-    }
-
-    String url = String.format(WeiboMpApiUrl.Other.OAUTH2_USERINFO_URL.getUrl(this.getWxMpConfigStorage()), token.getAccessToken(), token.getOpenId(), lang);
-
-    try {
-      RequestExecutor<String, String> executor = SimpleGetRequestExecutor.create(this);
-      String responseText = executor.execute(url, null, WeiboType.MP);
-      return WeiboFansUser.fromJson(responseText);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public boolean oauth2validateAccessToken(WeiboMpOAuth2AccessToken token) {
-    String url = String.format(WeiboMpApiUrl.Other.OAUTH2_VALIDATE_TOKEN_URL.getUrl(this.getWxMpConfigStorage()), token.getAccessToken(), token.getOpenId());
-
-    try {
-      SimpleGetRequestExecutor.create(this).execute(url, null, WeiboType.MP);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } catch (WeiboErrorException e) {
-      return false;
-    }
-    return true;
-  }
-
-  @Override
-  public String[] getCallbackIP() throws WeiboErrorException {
-    String responseContent = this.get(WeiboMpApiUrl.Other.GET_CALLBACK_IP_URL, null);
-    JsonElement tmpJsonElement = JSON_PARSER.parse(responseContent);
-    JsonArray ipList = tmpJsonElement.getAsJsonObject().get("ip_list").getAsJsonArray();
-    String[] ipArray = new String[ipList.size()];
-    for (int i = 0; i < ipList.size(); i++) {
-      ipArray[i] = ipList.get(i).getAsString();
-    }
-    return ipArray;
-  }
-
-  @Override
-  public WeiboNetCheckResult netCheck(String action, String operator) throws WeiboErrorException {
-    JsonObject o = new JsonObject();
-    o.addProperty("action", action);
-    o.addProperty("check_operator", operator);
-    String responseContent = this.post(WeiboMpApiUrl.Other.NETCHECK_URL, o.toString());
-    return WeiboNetCheckResult.fromJson(responseContent);
-  }
-
-  @Override
-  public WeiboMpCurrentAutoReplyInfo getCurrentAutoReplyInfo() throws WeiboErrorException {
-    return WeiboMpCurrentAutoReplyInfo.fromJson(this.get(WeiboMpApiUrl.Other.GET_CURRENT_AUTOREPLY_INFO_URL, null));
-  }
-
-  @Override
-  public void clearQuota(String appid) throws WeiboErrorException {
-    JsonObject o = new JsonObject();
-    o.addProperty("appid", appid);
-    this.post(WeiboMpApiUrl.Other.CLEAR_QUOTA_URL, o.toString());
   }
 
   @Override
@@ -447,23 +269,23 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   }
 
   @Override
-  public WeiboMpService switchoverTo(String mpId) {
-    if (this.configStorageMap.containsKey(mpId)) {
-      WeiboMpConfigStorageHolder.set(mpId);
+  public WeiboMpService switchoverTo(String weiboId) {
+    if (this.configStorageMap.containsKey(weiboId)) {
+      WeiboMpConfigStorageHolder.set(weiboId);
       return this;
     }
 
-    throw new RuntimeException(String.format("无法找到对应【%s】的公众号配置信息，请核实！", mpId));
+    throw new RuntimeException(String.format("无法找到对应【%s】的微博企业号配置信息，请核实！", weiboId));
   }
 
   @Override
-  public boolean switchover(String mpId) {
-    if (this.configStorageMap.containsKey(mpId)) {
-      WeiboMpConfigStorageHolder.set(mpId);
+  public boolean switchover(String weiboId) {
+    if (this.configStorageMap.containsKey(weiboId)) {
+      WeiboMpConfigStorageHolder.set(weiboId);
       return true;
     }
 
-    log.error("无法找到对应【{}】的公众号配置信息，请核实！", mpId);
+    log.error("无法找到对应【{}】的微博企业号配置信息，请核实！", weiboId);
     return false;
   }
 
@@ -478,11 +300,6 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   }
 
   @Override
-  public WeiboMpMaterialService getMaterialService() {
-    return this.materialService;
-  }
-
-  @Override
   public WeibCustomMenuService getMenuService() {
     return this.menuService;
   }
@@ -493,7 +310,7 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   }
 
   @Override
-  public WeiboFansTagService getUserTagService() {
+  public WeiboFansGroupService getUserTagService() {
     return this.userGroupService;
   }
 
@@ -502,34 +319,17 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
     return this.qrCodeService;
   }
 
+  /**
+   * 发送消息相关的Service
+   */
   @Override
-  public WeiboDataCubeService getDataCubeService() {
-    return this.dataCubeService;
-  }
-
-  @Override
-  public WeiboMpUserBlacklistService getBlackListService() {
-    return this.blackListService;
-  }
-
-  @Override
-  public WeiboMpSubscribeMsgService getSubscribeMsgService() {
-    return this.subscribeMsgService;
+  public WeiboFansMessageService getMessageService() {
+    return this.messageService;
   }
 
   @Override
   public RequestHttp getRequestHttp() {
     return this;
-  }
-
-  @Override
-  public WeibFansMassMessageService getMassMessageService() {
-    return this.massMessageService;
-  }
-
-  @Override
-  public void setMaterialService(WeiboMpMaterialService materialService) {
-    this.materialService = materialService;
   }
 
   @Override
@@ -543,7 +343,7 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
   }
 
   @Override
-  public void setUserGroupService(WeiboFansTagService userGroupService) {
+  public void setUserGroupService(WeiboFansGroupService userGroupService) {
     this.userGroupService = userGroupService;
   }
 
@@ -552,28 +352,12 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
     this.qrCodeService = qrCodeService;
   }
 
+  /**
+   * .
+   *
+   * @param messageService
+   */
   @Override
-  public void setDataCubeService(WeiboDataCubeService dataCubeService) {
-    this.dataCubeService = dataCubeService;
-  }
+  public void setMessageService(WeiboFansMessageService messageService) { this.messageService = messageService;}
 
-  @Override
-  public void setBlackListService(WeiboMpUserBlacklistService blackListService) {
-    this.blackListService = blackListService;
-  }
-
-  @Override
-  public void setMassMessageService(WeibFansMassMessageService massMessageService) {
-    this.massMessageService = massMessageService;
-  }
-
-  @Override
-  public WeiboImgProcService getImgProcService() {
-    return this.imgProcService;
-  }
-
-  @Override
-  public void setImgProcService(WeiboImgProcService imgProcService) {
-    this.imgProcService = imgProcService;
-  }
 }

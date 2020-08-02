@@ -8,7 +8,7 @@ import vip.seanxq.weibo.common.util.json.WeiboGsonBuilder;
 /**
  * access token.
  *
- * @author Daniel Qian
+ * OAuth2.0对于未审核应用有效期为24小时，对于已审核应用有效期最低为30天，不同的应用级别有效期不同.
  */
 @Data
 public class WeiboAccessToken implements Serializable {

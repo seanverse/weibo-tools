@@ -2,7 +2,6 @@ package vip.seanxq.weibo.mp.api;
 
 import vip.seanxq.weibo.common.bean.menu.WeiboMenu;
 import vip.seanxq.weibo.common.error.WeiboErrorException;
-import vip.seanxq.weibo.mp.bean.menu.WeiboMpGetSelfMenuInfoResult;
 
 /**
  * 菜单相关操作接口.

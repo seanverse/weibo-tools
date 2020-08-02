@@ -21,8 +21,7 @@ import vip.seanxq.weibo.common.session.InternalSessionManager;
 import vip.seanxq.weibo.common.session.StandardSessionManager;
 import vip.seanxq.weibo.common.session.WeiboSessionManager;
 import vip.seanxq.weibo.common.util.LogExceptionHandler;
-import vip.seanxq.weibo.mp.bean.message.WeiboMpXmlMessage;
-import vip.seanxq.weibo.mp.bean.message.WeiboMpXmlOutMessage;
+import vip.seanxq.weibo.mp.bean.message.WeiboReceiveMessage;
 
 /**
  * <pre>
@@ -46,14 +45,13 @@ import vip.seanxq.weibo.mp.bean.message.WeiboMpXmlOutMessage;
  *   .end()
  * ;
  *
- * // 将WxXmlMessage交给消息路由器
+ * // 将message交给消息路由器
  * router.route(message);
  *
  *
  *
  * </pre>
  *
- * @author Daniel Qian
  */
 public class WeiboFansMessageRouter {
   private static final int DEFAULT_THREAD_POOL_SIZE = 100;
@@ -151,26 +149,26 @@ public class WeiboFansMessageRouter {
   /**
    * 处理微博消息.
    */
-  public WeiboMpXmlOutMessage route(final WeiboMpXmlMessage wxMessage, final Map<String, Object> context) {
-    return route(wxMessage, context, null);
+  public WeiboReceiveMessage route(final WeiboReceiveMessage wbMessage, final Map<String, Object> context) {
+    return route(wbMessage, context, null);
   }
 
   /**
    * 处理不同appid微博消息
    */
-  public WeiboMpXmlOutMessage route(final String appid, final WeiboMpXmlMessage wxMessage, final Map<String, Object> context) {
-    return route(wxMessage, context, this.weiboMpService.switchoverTo(appid));
+  public WeiboReceiveMessage route(final String appid, final WeiboReceiveMessage wbMessage, final Map<String, Object> context) {
+    return route(wbMessage, context, this.weiboMpService.switchoverTo(appid));
   }
 
   /**
    * 处理微博消息.
    */
-  public WeiboMpXmlOutMessage route(final WeiboMpXmlMessage wxMessage, final Map<String, Object> context, WeiboMpService wxMpService) {
+  public WeiboReceiveMessage route(final WeiboReceiveMessage wbMessage, final Map<String, Object> context, WeiboMpService wxMpService) {
     if (wxMpService == null) {
       wxMpService = this.weiboMpService;
     }
     final WeiboMpService mpService = wxMpService;
-    if (isMsgDuplicated(wxMessage)) {
+    if (isMsgDuplicated(wbMessage)) {
       // 如果是重复消息，那么就不做处理
       return null;
     }
@@ -178,7 +176,7 @@ public class WeiboFansMessageRouter {
     final List<WeiboFansMessageRouterRule> matchRules = new ArrayList<>();
     // 收集匹配的规则
     for (final WeiboFansMessageRouterRule rule : this.rules) {
-      if (rule.test(wxMessage)) {
+      if (rule.test(wbMessage)) {
         matchRules.add(rule);
         if (!rule.isReEnter()) {
           break;
@@ -190,7 +188,7 @@ public class WeiboFansMessageRouter {
       return null;
     }
 
-    WeiboMpXmlOutMessage res = null;
+    WeiboReceiveMessage res = null;
     final List<Future<?>> futures = new ArrayList<>();
     for (final WeiboFansMessageRouterRule rule : matchRules) {
       // 返回最后一个非异步的rule的执行结果
@@ -199,15 +197,15 @@ public class WeiboFansMessageRouter {
           this.executorService.submit(new Runnable() {
             @Override
             public void run() {
-              rule.service(wxMessage, context, mpService, WeiboFansMessageRouter.this.sessionManager, WeiboFansMessageRouter.this.exceptionHandler);
+              rule.service(wbMessage, context, mpService, WeiboFansMessageRouter.this.sessionManager, WeiboFansMessageRouter.this.exceptionHandler);
             }
           })
         );
       } else {
-        res = rule.service(wxMessage, context, mpService, this.sessionManager, this.exceptionHandler);
+        res = rule.service(wbMessage, context, mpService, this.sessionManager, this.exceptionHandler);
         // 在同步操作结束，session访问结束
-        this.log.debug("End session access: async=false, sessionId={}", wxMessage.getFromUser());
-        sessionEndAccess(wxMessage);
+        this.log.debug("End session access: async=false, sessionId={}", wbMessage.getSenderId());
+        sessionEndAccess(wbMessage);
       }
     }
 
@@ -218,9 +216,9 @@ public class WeiboFansMessageRouter {
           for (Future<?> future : futures) {
             try {
               future.get();
-              WeiboFansMessageRouter.this.log.debug("End session access: async=true, sessionId={}", wxMessage.getFromUser());
+              WeiboFansMessageRouter.this.log.debug("End session access: async=true, sessionId={}", wbMessage.getSenderId());
               // 异步操作结束，session访问结束
-              sessionEndAccess(wxMessage);
+              sessionEndAccess(wbMessage);
             } catch (InterruptedException e) {
               WeiboFansMessageRouter.this.log.error("Error happened when wait task finish", e);
               Thread.currentThread().interrupt();
@@ -234,40 +232,35 @@ public class WeiboFansMessageRouter {
     return res;
   }
 
-  public WeiboMpXmlOutMessage route(final WeiboMpXmlMessage wxMessage) {
-    return this.route(wxMessage, new HashMap<String, Object>(2));
+  public WeiboReceiveMessage route(final WeiboReceiveMessage wbMessage) {
+    return this.route(wbMessage, new HashMap<String, Object>(2));
   }
 
-  public WeiboMpXmlOutMessage route(String appid, final WeiboMpXmlMessage wxMessage) {
-    return this.route(appid, wxMessage, new HashMap<String, Object>(2));
+  public WeiboReceiveMessage route(String appid, final WeiboReceiveMessage wbMessage) {
+    return this.route(appid, wbMessage, new HashMap<String, Object>(2));
   }
 
-  private boolean isMsgDuplicated(WeiboMpXmlMessage wxMessage) {
+  /**
+   * 对于每一个POST请求，开发者在响应包（Get）中返回特定JSON包，对该消息进行响应。微博服务器在五秒内收不到响应会断掉连接，并且重新发起请求，总共重试三次；
+   *
+   * 关于重试的消息排重，目前微博消息暂时不支持消息ID，推荐使用FromUserName + CreateTime 排重；
+   *
+   * 假如开发者无法保证在五秒内处理并回复，可以直接回复空串，微博服务器不会对此作任何处理，并且不会发起重试。
+   */
+  private boolean isMsgDuplicated(WeiboReceiveMessage wbMessage) {
     StringBuilder messageId = new StringBuilder();
-    if (wxMessage.getMsgId() == null) {
-      messageId.append(wxMessage.getCreateTime())
-        .append("-").append(wxMessage.getFromUser())
-        .append("-").append(StringUtils.trimToEmpty(wxMessage.getEventKey()))
-        .append("-").append(StringUtils.trimToEmpty(wxMessage.getEvent()));
-    } else {
-      messageId.append(wxMessage.getMsgId())
-        .append("-").append(wxMessage.getCreateTime())
-        .append("-").append(wxMessage.getFromUser());
-    }
-
-    if (StringUtils.isNotEmpty(wxMessage.getUserCardCode())) {
-      messageId.append("-").append(wxMessage.getUserCardCode());
-    }
-
+      messageId.append(wbMessage.getCreatedAt())
+        .append("-").append(wbMessage.getSenderId())
+        .append("-").append(StringUtils.trimToEmpty(wbMessage.getEventData().getSubType().toString()))
+        .append("-").append(StringUtils.trimToEmpty(wbMessage.getEventData().getDataKey()));
     return this.messageDuplicateChecker.isDuplicate(messageId.toString());
-
   }
 
   /**
    * 对session的访问结束.
    */
-  private void sessionEndAccess(WeiboMpXmlMessage wxMessage) {
-    InternalSession session = ((InternalSessionManager) this.sessionManager).findSession(wxMessage.getFromUser());
+  private void sessionEndAccess(WeiboReceiveMessage wbMessage) {
+    InternalSession session = ((InternalSessionManager) this.sessionManager).findSession(wbMessage.getSenderId());
     if (session != null) {
       session.endAccess();
     }

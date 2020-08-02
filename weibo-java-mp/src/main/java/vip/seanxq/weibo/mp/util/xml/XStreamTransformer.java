@@ -9,8 +9,6 @@ import java.util.Map;
 
 import com.thoughtworks.xstream.XStream;
 import vip.seanxq.weibo.common.util.xml.XStreamInitializer;
-import vip.seanxq.weibo.mp.bean.message.*;
-import vip.seanxq.weibo.mp.bean.message.WeiboMpXmlOutTextMessage;
 
 /**
  * wx xml <--> mp message object

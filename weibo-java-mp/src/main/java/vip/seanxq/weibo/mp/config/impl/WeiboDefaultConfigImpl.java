@@ -43,9 +43,6 @@ public class WeiboDefaultConfigImpl implements WeiboConfigStorage, Serializable 
   protected volatile String sdkTicket;
   protected volatile long sdkTicketExpiresTime;
 
-  protected volatile String cardApiTicket;
-  protected volatile long cardApiTicketExpiresTime;
-
   protected Lock accessTokenLock = new ReentrantLock();
   protected Lock jsapiTicketLock = new ReentrantLock();
   protected Lock sdkTicketLock = new ReentrantLock();
@@ -171,11 +168,6 @@ public class WeiboDefaultConfigImpl implements WeiboConfigStorage, Serializable 
   @Override
   public boolean autoRefreshToken() {
     return true;
-  }
-
-  @Override
-  public WeiboMpHostConfig getHostConfig() {
-    return null;
   }
 
 }

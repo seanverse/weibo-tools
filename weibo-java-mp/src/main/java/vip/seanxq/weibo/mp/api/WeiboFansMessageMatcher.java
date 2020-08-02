@@ -1,6 +1,6 @@
 package vip.seanxq.weibo.mp.api;
 
-import vip.seanxq.weibo.mp.bean.message.WeiboMpXmlMessage;
+import vip.seanxq.weibo.mp.bean.message.WeiboReceiveMessage;
 
 /**
  * 消息匹配器，用在消息路由的时候
@@ -12,6 +12,6 @@ public interface WeiboFansMessageMatcher {
    *
    * @param message
    */
-  boolean match(WeiboMpXmlMessage message);
+  boolean match(WeiboReceiveMessage message);
 
 }
