@@ -43,7 +43,7 @@ import java.util.concurrent.locks.Lock;
  */
 @Slf4j
 public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, RequestHttp<H, P> {
-  private static final JsonParser JSON_PARSER = new JsonParser();
+  //private static final JsonParser JSON_PARSER = new JsonParser();
 
   protected WeiboSessionManager sessionManager = new StandardSessionManager();
   private WeibCustomMenuService menuService = new WeibCustomMenuServiceImpl(this);
@@ -167,7 +167,7 @@ public abstract class BaseWeiboMpServiceImpl<H, P> implements WeiboMpService, Re
     String accessToken = getAccessToken(false);
 
     //weixin是在每个uri的queryparam带上?access_token = accessToken
-    //weibo的Post则是放入access_token放入request body中
+    //weibo的Post则是放入access_token放入request body中,只有部分API是放入url里
     //例如：curl "https://m.api.weibo.com/2/messages/custom_rule/update.json" -d 'access_token=ACCESS_TOKEN&id=ID&name=NAME'
     //get则是放在queryparam ，例如：curl "https://m.api.weibo.com/2/messages/custom_rule/getid.json?access_token=ACCESS_TOKEN&follower_id=FOLLOWER_ID"
 

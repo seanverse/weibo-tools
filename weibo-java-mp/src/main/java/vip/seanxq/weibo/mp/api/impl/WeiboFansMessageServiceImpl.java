@@ -66,8 +66,8 @@ public class WeiboFansMessageServiceImpl implements WeiboFansMessageService {
   @Override
   public MessMessageReuslt SendMessMessageByGroup(@NonNull WeiboMessMessage message) throws WeiboErrorException {
     if (!message.isFilterByGroup()) throw new RuntimeException("传入的消息结构不含分组条件");
-    String url=  String.format("%s?access_token=%s",WeiboMpApiUrl.SendMessage.MSG_SEND_MESS_MESSAGE, this.weiboMpService.getAccessToken(false));
-    String responseContent = this.weiboMpService.postJson(url, message.toJson());
+    //String url=  String.format("%s?access_token=%s",WeiboMpApiUrl.SendMessage.MSG_SEND_MESS_MESSAGE, this.weiboMpService.getAccessToken(false));
+    String responseContent = this.weiboMpService.post(WeiboMpApiUrl.SendMessage.MSG_SEND_MESS_MESSAGE, message.toJson());
     return MessMessageReuslt.fromJson(responseContent);
   }
 
@@ -94,8 +94,8 @@ public class WeiboFansMessageServiceImpl implements WeiboFansMessageService {
   @Override
   public MessMessageReuslt SendMessMesageByUID(@NonNull WeiboMessMessage message) throws WeiboErrorException {
     if (message.isFilterByGroup()) throw new RuntimeException("传入的消息结构不含用户信息");
-    String url=  String.format("%s?access_token=%s",WeiboMpApiUrl.SendMessage.MSG_SEND_MESS_MESSAGE, this.weiboMpService.getAccessToken(false));
-    String responseContent = this.weiboMpService.postJson(url, message.toJson());
+    //String url=  String.format("%s?access_token=%s",WeiboMpApiUrl.SendMessage.MSG_SEND_MESS_MESSAGE, this.weiboMpService.getAccessToken(false));
+    String responseContent = this.weiboMpService.post(WeiboMpApiUrl.SendMessage.MSG_SEND_MESS_MESSAGE, message.toJson()); //post的实现中会根据是不是json(以{ 开头）
     return MessMessageReuslt.fromJson(responseContent);
   }
 }

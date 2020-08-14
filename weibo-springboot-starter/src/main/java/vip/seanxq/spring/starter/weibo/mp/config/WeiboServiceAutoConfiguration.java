@@ -29,27 +29,27 @@ public class WeiboServiceAutoConfiguration {
   //ConditionalOnMissingBean是作为斥条件，为空时表示当MPService有进行注册时，这里不再进行注册，避免重复注册
   public WeiboMpService wxMpService(WeiboConfigStorage configStorage, WeiboMpProperties weiboMpProperties) {
     WeiboMpProperties.HttpClientType httpClientType = weiboMpProperties.getConfigStorage().getHttpClientType();
-    WeiboMpService wxMpService;
+    WeiboMpService weiboService;
     /*if (httpClientType == WeiboMpProperties.HttpClientType.okhttp) {
       wxMpService = newWxMpServiceJoddHttpImpl();
     } else if (httpClientType == WeiboMpProperties.HttpClientType.joddhttp) {
       wxMpService = newWxMpServiceOkHttpImpl();
     } else */
     if (httpClientType == WeiboMpProperties.HttpClientType.httpclient) {
-      wxMpService = newWxMpServiceHttpClientImpl();
+      weiboService = newWeiboServiceHttpClientImpl();
     } else {
-      wxMpService = newWxMpServiceImpl();
+      weiboService = newWeiboServiceImpl();
     }
 
-    wxMpService.setWxMpConfigStorage(configStorage);
-    return wxMpService;
+    weiboService.setWxMpConfigStorage(configStorage);
+    return weiboService;
   }
 
-  private WeiboMpService newWxMpServiceImpl() {
+  private WeiboMpService newWeiboServiceImpl() {
     return new WeiboMpServiceImpl();
   }
 
-  private WeiboMpService newWxMpServiceHttpClientImpl() {
+  private WeiboMpService newWeiboServiceHttpClientImpl() {
     return new WeiboMpServiceHttpClientImpl();
   }
 
